@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title><%=pageTitle%></title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#04060f;
+  --cyan:#00ffe5;
+  --purple:#b84fff;
+  --pink:#ff2d78;
+  --yellow:#ffe600;
+  --green:#00ff6a;
+  --text:#e8f7ff;
+}
+body{
+  width:100%;min-height:100vh;
+  background:var(--bg);
+  font-family:'Press Start 2P',cursive;
+  color:var(--text);
+  overflow-x:hidden;
+  image-rendering:pixelated;
+  position:relative;
+}
+
+/* ANIMATED PIXEL BG */
+.bg-layer{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%,rgba(184,79,255,0.22),transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%,rgba(0,255,229,0.18),transparent 60%),
+    radial-gradient(ellipse 40% 30% at 60% 10%,rgba(255,45,120,0.14),transparent 55%),
+    #04060f;
+}
+
+/* SCANLINES */
+.scanlines{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.18) 0px,rgba(0,0,0,0.18) 1px,
+    transparent 1px,transparent 3px
+  );
+}
+
+/* GRID FLOOR */
+.grid-floor{
+  position:fixed;bottom:-10%;left:-5%;width:110%;height:45%;z-index:1;
+  background:
+    linear-gradient(rgba(0,255,229,0.12) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,229,0.12) 1px,transparent 1px);
+  background-size:48px 48px;
+  transform:perspective(600px) rotateX(72deg);
+  opacity:0.5;
+}
+
+/* STARS */
+#stars{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.star{position:absolute;background:#fff;}
+
+/* FLOATING PIXELS */
+.pixel-float{
+  position:fixed;z-index:1;pointer-events:none;
+  image-rendering:pixelated;
+  animation:floatUp linear infinite;
+  opacity:0;
+}
+@keyframes floatUp{
+  0%{transform:translateY(100vh) rotate(0deg);opacity:0;}
+  10%{opacity:0.8;}
+  90%{opacity:0.5;}
+  100%{transform:translateY(-20vh) rotate(360deg);opacity:0;}
+}
+
+/* WRAPPER */
+.wrapper{
+  position:relative;z-index:10;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 20px 60px;
+}
+
+/* TOP STATUS BAR */
+.statusbar{
+  width:100%;max-width:900px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.45rem;
+  margin-bottom:40px;
+  padding:10px 16px;
+  border:2px solid rgba(0,255,229,0.3);
+  background:rgba(0,255,229,0.04);
+}
+.status-pill{display:flex;align-items:center;gap:8px;}
+.blinker{
+  width:8px;height:8px;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:blinkDot 1s step-end infinite;
+}
+@keyframes blinkDot{50%{opacity:0;}}
+.online-txt{color:var(--green);text-shadow:0 0 8px var(--green);}
+.build-txt{color:rgba(0,255,229,0.6);}
+
+/* HERO */
+.hero{
+  width:100%;max-width:900px;
+  position:relative;
+  padding:48px 44px 44px;
+  background:rgba(4,6,20,0.88);
+  border:4px solid var(--purple);
+  box-shadow:
+    0 0 0 1px rgba(184,79,255,0.3),
+    0 0 40px rgba(184,79,255,0.35),
+    0 0 80px rgba(0,255,229,0.12),
+    inset 0 0 40px rgba(184,79,255,0.06);
+  margin-bottom:32px;
+}
+.hero::before,.hero::after{
+  content:"";position:absolute;width:24px;height:24px;
+}
+.hero::before{top:8px;left:8px;border-top:3px solid var(--cyan);border-left:3px solid var(--cyan);}
+.hero::after{top:8px;right:8px;border-top:3px solid var(--pink);border-right:3px solid var(--pink);}
+.hero .c-br{
+  position:absolute;bottom:8px;left:8px;
+  width:24px;height:24px;
+  border-bottom:3px solid var(--yellow);
+  border-left:3px solid var(--yellow);
+}
+.hero .c-bl{
+  position:absolute;bottom:8px;right:8px;
+  width:24px;height:24px;
+  border-bottom:3px solid var(--green);
+  border-right:3px solid var(--green);
+}
+
+/* TITLE */
+.game-title{
+  font-size:3.4rem;
+  line-height:1.25;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  margin-bottom:8px;
+  display:inline-block;
+}
+.game-title .line1{
+  display:block;color:#fff;
+  text-shadow:4px 4px 0 var(--purple),8px 8px 0 rgba(184,79,255,0.4),0 0 30px rgba(255,255,255,0.5);
+  animation:titleGlitch 6s infinite;
+}
+.game-title .line2{
+  display:block;color:var(--cyan);
+  text-shadow:4px 4px 0 #006d6a,0 0 20px var(--cyan),0 0 40px rgba(0,255,229,0.4);
+}
+@keyframes titleGlitch{
+  0%,92%,100%{transform:translate(0);}
+  93%{transform:translate(-3px,1px);filter:hue-rotate(40deg);}
+  94%{transform:translate(3px,-1px);filter:hue-rotate(-30deg);}
+  95%{transform:translate(0);}
+  96%{transform:translate(-2px,0);filter:hue-rotate(20deg);}
+  97%{transform:translate(0);}
+}
+
+/* VERSION BADGE */
+.ver-badge{
+  display:inline-block;
+  background:var(--pink);color:#fff;
+  font-size:0.38rem;padding:5px 10px;
+  margin-bottom:28px;
+  box-shadow:0 0 12px var(--pink),3px 3px 0 rgba(0,0,0,0.4);
+  letter-spacing:1px;
+}
+
+/* SUBTITLE */
+.subtitle{
+  font-size:0.55rem;line-height:2.4;
+  color:#b8cfff;max-width:720px;margin-bottom:40px;
+}
+.subtitle span{color:var(--yellow);text-shadow:0 0 8px var(--yellow);}
+
+/* HP / XP / MP BARS */
+.stat-bars{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:36px;}
+.stat-item{font-size:0.42rem;flex:1;min-width:160px;}
+.stat-label{display:flex;justify-content:space-between;margin-bottom:6px;color:#8cf7ff;}
+.bar-track{
+  height:10px;
+  background:rgba(255,255,255,0.07);
+  border:2px solid rgba(255,255,255,0.1);
+  position:relative;overflow:hidden;
+}
+.bar-fill{height:100%;position:absolute;top:0;left:0;animation:barLoad 1.4s ease-out forwards;}
+@keyframes barLoad{from{width:0;}}
+.bar-hp{background:var(--green);box-shadow:0 0 8px var(--green);width:87%;}
+.bar-xp{background:var(--yellow);box-shadow:0 0 8px var(--yellow);width:62%;}
+.bar-mp{background:var(--purple);box-shadow:0 0 8px var(--purple);width:75%;}
+
+/* BUTTONS */
+.buttons{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:44px;}
+.btn{
+  position:relative;
+  font-family:'Press Start 2P',cursive;
+  font-size:0.58rem;padding:16px 22px;
+  cursor:pointer;border:none;
+  text-transform:uppercase;letter-spacing:1px;
+  overflow:hidden;transition:transform 0.1s;
+}
+.btn:hover{transform:translateY(-4px);}
+.btn:active{transform:scale(0.96) translateY(0);}
+.btn-start{
+  background:var(--purple);color:#fff;
+  box-shadow:0 6px 0 #5a0099,0 0 20px rgba(184,79,255,0.6);
+}
+.btn-start:hover{box-shadow:0 4px 0 #5a0099,0 0 30px rgba(184,79,255,0.9);}
+.btn-join{
+  background:var(--cyan);color:#021a18;
+  box-shadow:0 6px 0 #006d6a,0 0 20px rgba(0,255,229,0.5);
+}
+.btn-join:hover{box-shadow:0 4px 0 #006d6a,0 0 30px rgba(0,255,229,0.8);}
+.btn-log{
+  background:transparent;color:var(--yellow);
+  border:3px solid var(--yellow);
+  box-shadow:0 6px 0 #7a6b00,0 0 12px rgba(255,230,0,0.3);
+}
+.btn-log:hover{background:rgba(255,230,0,0.08);}
+.btn::after{
+  content:"";position:absolute;
+  top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+  transition:left 0.5s;
+}
+.btn:hover::after{left:140%;}
+
+/* FEATURE CARDS */
+.feature-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:16px;margin-bottom:40px;
+}
+.fcard{
+  padding:22px 18px;
+  background:rgba(255,255,255,0.025);
+  border:3px solid rgba(255,255,255,0.07);
+  position:relative;transition:transform 0.15s,border-color 0.15s;
+  cursor:default;
+}
+.fcard:hover{transform:translateY(-6px);}
+.fcard:nth-child(1):hover{border-color:var(--pink);box-shadow:0 0 20px rgba(255,45,120,0.3);}
+.fcard:nth-child(2):hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,255,229,0.3);}
+.fcard:nth-child(3):hover{border-color:var(--purple);box-shadow:0 0 20px rgba(184,79,255,0.3);}
+.fcard:nth-child(4):hover{border-color:var(--yellow);box-shadow:0 0 20px rgba(255,230,0,0.3);}
+.fcard-icon{font-size:1.8rem;margin-bottom:14px;display:block;}
+.fcard h3{font-size:0.5rem;margin-bottom:12px;letter-spacing:1px;}
+.fcard:nth-child(1) h3{color:var(--pink);}
+.fcard:nth-child(2) h3{color:var(--cyan);}
+.fcard:nth-child(3) h3{color:var(--purple);}
+.fcard:nth-child(4) h3{color:var(--yellow);}
+.fcard p{font-size:0.42rem;color:#9fb3d8;line-height:2.1;}
+.fcard .card-num{position:absolute;top:10px;right:12px;font-size:0.38rem;color:rgba(255,255,255,0.15);}
+
+/* FEEDBACK SECTION */
+.feedback-section{
+  width:100%;max-width:900px;
+  padding:36px 44px;
+  background:rgba(4,6,20,0.88);
+  border:3px solid rgba(0,255,229,0.25);
+  box-shadow:0 0 30px rgba(0,255,229,0.08);
+  margin-bottom:28px;
+}
+.section-title{font-size:0.65rem;margin-bottom:28px;letter-spacing:2px;}
+.section-title span{color:var(--cyan);text-shadow:0 0 10px var(--cyan);}
+.form-group{margin-bottom:18px;}
+.form-group label{
+  display:block;font-size:0.42rem;
+  color:#8cf7ff;margin-bottom:8px;letter-spacing:1px;
+}
+.form-group input,
+.form-group textarea{
+  width:100%;
+  background:rgba(0,255,229,0.04);
+  border:2px solid rgba(0,255,229,0.2);
+  color:var(--text);
+  font-family:'Press Start 2P',cursive;
+  font-size:0.45rem;
+  padding:12px 14px;
+  outline:none;transition:border-color 0.2s;
+}
+.form-group input:focus,
+.form-group textarea:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 12px rgba(0,255,229,0.2);
+}
+.form-group textarea{resize:vertical;min-height:100px;line-height:2;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.btn-submit{
+  font-family:'Press Start 2P',cursive;
+  font-size:0.55rem;padding:14px 28px;
+  background:var(--green);color:#021a08;
+  border:none;cursor:pointer;
+  box-shadow:0 5px 0 #007030,0 0 18px rgba(0,255,106,0.4);
+  transition:transform 0.1s;letter-spacing:1px;
+}
+.btn-submit:hover{transform:translateY(-3px);}
+.btn-submit:active{transform:scale(0.97);}
+
+/* FOOTER */
+.footer{
+  width:100%;max-width:900px;
+  padding:18px 44px;
+  border:2px solid rgba(255,255,255,0.06);
+  background:rgba(4,6,20,0.7);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:12px;
+  font-size:0.42rem;color:rgba(255,255,255,0.3);
+}
+.footer-link{
+  color:var(--purple);text-shadow:0 0 8px var(--purple);
+  cursor:pointer;background:none;border:none;
+  font-family:'Press Start 2P',cursive;font-size:0.42rem;
+}
+
+@media(max-width:680px){
+  .hero,.feedback-section{padding:28px 20px;}
+  .game-title{font-size:2rem;}
+  .buttons,.form-row{flex-direction:column;grid-template-columns:1fr;}
+  .btn{width:100%;}
+  .footer{flex-direction:column;align-items:flex-start;}
+  .statusbar{font-size:0.38rem;}
+}
+
+/* ── Pixel loading screen ── */
+.pixel-loader{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease;}
+.pixel-loader.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.pl-inner{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.pl-sprite{display:flex;gap:6px;}
+.pl-sprite span{width:10px;height:10px;animation:plBounce .9s ease-in-out infinite;}
+.pl-sprite span:nth-child(1){background:var(--purple);box-shadow:0 0 8px var(--purple);animation-delay:0s;}
+.pl-sprite span:nth-child(2){background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation-delay:.12s;}
+.pl-sprite span:nth-child(3){background:var(--yellow);box-shadow:0 0 8px var(--yellow);animation-delay:.24s;}
+.pl-sprite span:nth-child(4){background:var(--pink);box-shadow:0 0 8px var(--pink);animation-delay:.36s;}
+@keyframes plBounce{0%,60%,100%{transform:translateY(0);opacity:.6;}30%{transform:translateY(-14px);opacity:1;}}
+.pl-bar{width:160px;height:8px;background:rgba(255,255,255,0.07);border:2px solid var(--purple);overflow:hidden;}
+.pl-bar-fill{height:100%;width:0%;background:repeating-linear-gradient(90deg,var(--purple) 0,var(--purple) 4px,var(--cyan) 4px,var(--cyan) 8px);animation:plFill 1.3s ease-in-out infinite;}
+@keyframes plFill{0%{width:0%;}50%{width:100%;}100%{width:0%;}}
+.pl-text{font-size:0.5rem;color:var(--yellow);letter-spacing:2px;text-shadow:0 0 8px rgba(255,230,0,.6);}
+.pl-dots{animation:plBlink 1s steps(1) infinite;}
+@keyframes plBlink{50%{opacity:0;}}
+</style>
+</head>
+<body>
+
+<div class="pixel-loader" id="pixelLoader">
+  <div class="pl-inner">
+    <div class="pl-sprite"><span></span><span></span><span></span><span></span></div>
+    <div class="pl-bar"><div class="pl-bar-fill"></div></div>
+    <div class="pl-text">LOADING NEON RUINS<span class="pl-dots">...</span></div>
+  </div>
+</div>
+
+<div class="bg-layer"></div>
+<div class="scanlines"></div>
+<div class="grid-floor"></div>
+<div id="stars"></div>
+<div id="floaters"></div>
+
+<div class="wrapper">
+
+  <!-- STATUS BAR -->
+  <div class="statusbar">
+    <div class="build-txt">✦ BUILD v0.9.7_ALPHA &nbsp;|&nbsp; ZONE: SECTOR-9</div>
+    <div class="status-pill">
+      <div class="blinker"></div>
+      <span class="online-txt">SYSTEM ONLINE</span>
+    </div>
+  </div>
+
+  <!-- HERO PANEL -->
+  <div class="hero">
+    <div class="c-br"></div>
+    <div class="c-bl"></div>
+
+    <h1 class="game-title">
+      <span class="line1">ECHOES OF</span>
+      <span class="line2">OBLIVION</span>
+    </h1>
+
+    <div class="ver-badge">► NEON RUINS EDITION ◄</div>
+
+    <p class="subtitle">
+      Descend into forgotten neon ruins where <span>spectral energy</span> leaks through fractured dimensions.
+      Battle <span>machine gods</span>, awaken forbidden relics, and rewrite the final chapter of a collapsing world.
+    </p>
+
+    <!-- STAT BARS -->
+    <div class="stat-bars">
+      <div class="stat-item">
+        <div class="stat-label"><span>❤ HP</span><span>87/100</span></div>
+        <div class="bar-track"><div class="bar-fill bar-hp"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label"><span>★ XP</span><span>6200/10000</span></div>
+        <div class="bar-track"><div class="bar-fill bar-xp"></div></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label"><span>✦ MP</span><span>75/100</span></div>
+        <div class="bar-track"><div class="bar-fill bar-mp"></div></div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-start" onclick="location.href='/signin'">► SIGN IN</button>
+      <button class="btn btn-join" onclick="location.href='/signup'">► CREATE ACCOUNT</button>
+      <button class="btn btn-log">◌ GUEST MODE</button>
+    </div>
+
+    <div class="feature-grid">
+      <div class="fcard">
+        <div class="card-num">01</div>
+        <span class="fcard-icon">⚔</span>
+        <h3>TACTICAL COMBAT</h3>
+        <p>Precision combat against corrupted entities from dimensional fractures.</p>
+      </div>
+      <div class="fcard">
+        <div class="card-num">02</div>
+        <span class="fcard-icon">◈</span>
+        <h3>PIXEL WORLDS</h3>
+        <p>Anime-inspired biomes glowing with retro-futuristic ruins and lost civilizations.</p>
+      </div>
+      <div class="fcard">
+        <div class="card-num">03</div>
+        <span class="fcard-icon">☾</span>
+        <h3>SPECTRAL POWERS</h3>
+        <p>Channel forbidden relic energy to manipulate reality and bend combat.</p>
+      </div>
+      <div class="fcard">
+        <div class="card-num">04</div>
+        <span class="fcard-icon">⬡</span>
+        <h3>CO-OP RAIDS</h3>
+        <p>Form squads of 4 and assault dimensional strongholds for rare loot.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="feedback-section">
+    <p class="section-title">[ <span>TRANSMISSION</span> LOG ]</p>
+    <form method="POST" action="/player/feedback">
+      <div class="form-group">
+        <label for="feedback">// YOUR MESSAGE</label>
+        <textarea id="feedback" name="feedback" placeholder="Transmit your feedback to base..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">// AGENT NAME</label>
+          <input type="text" id="name" name="name" placeholder="GHOST_RIDER_99" required>
+        </div>
+        <div class="form-group">
+          <label for="email">// SIGNAL ADDRESS</label>
+          <input type="email" id="email" name="email" placeholder="you@neorealm.net" required>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">► TRANSMIT</button>
+    </form>
+  </div>
+  <div class="footer">
+    <span>NEURAL ARCHIVE LINK ESTABLISHED</span>
+    <button class="footer-link" onclick="location.href='/admin/verify/otp'">[ ADMIN ACCESS ]</button>
+    <span>© 2089 ECHO PROTOCOL</span>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+// Stars
+const sc = document.getElementById("stars");
+for (let i = 0; i < 130; i++) {
+  const s = document.createElement("div");
+  s.className = "star";
+  const sz = Math.random() * 3 + 1;
+  s.style.cssText = `
+    left:${Math.random() * 100}%;
+    top:${Math.random() * 70}%;
+    width:${sz}px; height:${sz}px;
+    opacity:${Math.random()};
+    box-shadow:0 0 ${sz * 3}px #fff;
+    animation:blink ${1.5 + Math.random() * 3}s ${Math.random() * 3}s infinite alternate;
+  `;
+  sc.appendChild(s);
+}
+
+// Floating pixel squares
+const fc = document.getElementById("floaters");
+const cols = ["#b84fff","#00ffe5","#ff2d78","#ffe600","#00ff6a"];
+for (let i = 0; i < 18; i++) {
+  const p = document.createElement("div");
+  p.className = "pixel-float";
+  const sz = Math.floor(Math.random() * 10 + 4);
+  const col = cols[Math.floor(Math.random() * cols.length)];
+  p.style.cssText = `
+    left:${Math.random() * 100}%;
+    width:${sz}px; height:${sz}px;
+    background:${col};
+    box-shadow:0 0 ${sz * 2}px ${col};
+    animation-duration:${6 + Math.random() * 10}s;
+    animation-delay:${Math.random() * 8}s;
+  `;
+  fc.appendChild(p);
+}
+
+// Blink keyframe
+const st = document.createElement("style");
+st.textContent = `@keyframes blink{from{opacity:0.15;}to{opacity:1;}}`;
+document.head.appendChild(st);
+
+window.addEventListener('load', function () {
+  var l = document.getElementById('pixelLoader');
+  if (!l) return;
+  setTimeout(function () {
+    l.classList.add('hide');
+    setTimeout(function () { l.remove(); }, 600);
+  }, 350);
+});
+</script>
+</body>
+</html>

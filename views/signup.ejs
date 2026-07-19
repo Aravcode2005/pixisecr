@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%=pageTitle%></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; image-rendering: pixelated; }
+
+    :root {
+      --gold:   #FFD54F;
+      --pink:   #FF6EB4;
+      --cyan:   #00E5FF;
+      --purple: #B39DDB;
+      --teal:   #1DE9B6;
+      --dark:   #060010;
+      --panel:  rgba(8, 0, 25, 0.95);
+      --border: #7C4DFF;
+    }
+
+    html, body { min-height: 100%; }
+
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    
+    .sky {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg,
+        #030018 0%,
+        #0a0035 40%,
+        #1a0050 70%,
+        #2d0060 100%
+      );
+      overflow: hidden;
+    }
+
+    
+    .sky::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 5%  8%,  #fff 100%, transparent),
+        radial-gradient(1px 1px at 12% 22%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 18% 5%,  #fff 100%, transparent),
+        radial-gradient(2px 2px at 22% 65%, rgba(0,229,255,0.9) 100%, transparent),
+        radial-gradient(1px 1px at 28% 38%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 33% 18%, rgba(255,255,255,0.7) 100%, transparent),
+        radial-gradient(1px 1px at 40% 80%, #fff 100%, transparent),
+        radial-gradient(2px 2px at 48% 12%, rgba(255,110,180,0.9) 100%, transparent),
+        radial-gradient(1px 1px at 55% 50%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 62% 28%, rgba(255,255,255,0.6) 100%, transparent),
+        radial-gradient(1px 1px at 68% 72%, #fff 100%, transparent),
+        radial-gradient(2px 2px at 74% 15%, rgba(255,213,79,0.8) 100%, transparent),
+        radial-gradient(1px 1px at 80% 42%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 86% 88%, rgba(255,255,255,0.5) 100%, transparent),
+        radial-gradient(1px 1px at 92% 30%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 96% 60%, rgba(255,255,255,0.7) 100%, transparent),
+        radial-gradient(1px 1px at 3%  55%, rgba(255,255,255,0.6) 100%, transparent),
+        radial-gradient(1px 1px at 58% 92%, rgba(255,110,180,0.6) 100%, transparent);
+    }
+
+    /* Shooting star */
+    .sky::after {
+      content: '';
+      position: absolute;
+      top: 15%;
+      left: -10%;
+      width: 3px;
+      height: 3px;
+      background: #fff;
+      box-shadow: 8px 2px 0 rgba(255,255,255,0.6), 16px 4px 0 rgba(255,255,255,0.3);
+      animation: shoot 6s linear infinite;
+      animation-delay: 2s;
+    }
+    @keyframes shoot {
+      0%   { transform: translate(0,0);         opacity: 0; }
+      5%   { opacity: 1; }
+      30%  { transform: translate(120vw, 40vh); opacity: 0; }
+      100% { transform: translate(120vw, 40vh); opacity: 0; }
+    }
+
+    .moon {
+      position: fixed;
+      top: 24px; right: 80px;
+      z-index: 1;
+      width: 4px; height: 4px;
+      background: var(--gold);
+      box-shadow:
+        4px 0 0 var(--gold), 8px 0 0 var(--gold), 12px 0 0 var(--gold), 16px 0 0 var(--gold),
+        0 4px 0 var(--gold), 4px 4px 0 #fff8dc, 8px 4px 0 #fff8dc, 12px 4px 0 #fff8dc, 16px 4px 0 var(--gold), 20px 4px 0 var(--gold),
+        0 8px 0 var(--gold), 4px 8px 0 #fff8dc, 8px 8px 0 #fffde7, 12px 8px 0 #fff8dc, 16px 8px 0 #fff8dc, 20px 8px 0 var(--gold), 24px 8px 0 var(--gold),
+        -4px 12px 0 var(--gold), 0 12px 0 var(--gold), 4px 12px 0 var(--gold), 8px 12px 0 #fff8dc, 12px 12px 0 #fff8dc, 16px 12px 0 var(--gold), 20px 12px 0 var(--gold), 24px 12px 0 var(--gold),
+        -4px 16px 0 var(--gold), 0 16px 0 var(--gold), 4px 16px 0 #fff8dc, 8px 16px 0 #fff8dc, 12px 16px 0 var(--gold), 16px 16px 0 var(--gold), 20px 16px 0 var(--gold),
+        0 20px 0 var(--gold), 4px 20px 0 var(--gold), 8px 20px 0 var(--gold), 12px 20px 0 var(--gold), 16px 20px 0 var(--gold),
+        4px 24px 0 rgba(255,213,79,0.5), 8px 24px 0 rgba(255,213,79,0.5), 12px 24px 0 rgba(255,213,79,0.3);
+      animation: moonPulse 4s ease-in-out infinite;
+    }
+    @keyframes moonPulse {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(255,213,79,0.4)); }
+      50%       { filter: drop-shadow(0 0 16px rgba(255,213,79,0.9)); }
+    }
+    .torii {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      opacity: 0.18;
+      width: 320px;
+    }
+
+    .petal {
+      position: fixed;
+      z-index: 1;
+      width: 6px; height: 6px;
+      background: #FF9EC0;
+      animation: drift linear infinite;
+    }
+    .petal:nth-child(1)  { left: 8%;   top: -10px; animation-duration: 8s;  animation-delay: 0s;   background: #FF9EC0; }
+    .petal:nth-child(2)  { left: 20%;  top: -10px; animation-duration: 11s; animation-delay: 1.5s; background: #FFB8D1; }
+    .petal:nth-child(3)  { left: 35%;  top: -10px; animation-duration: 9s;  animation-delay: 3s;   background: #FF9EC0; width: 4px; height: 4px; }
+    .petal:nth-child(4)  { left: 55%;  top: -10px; animation-duration: 12s; animation-delay: 0.5s; background: #FFD0E8; width: 4px; height: 4px; }
+    .petal:nth-child(5)  { left: 70%;  top: -10px; animation-duration: 10s; animation-delay: 2s;   background: #FF9EC0; }
+    .petal:nth-child(6)  { left: 85%;  top: -10px; animation-duration: 7s;  animation-delay: 4s;   background: #FFB8D1; width: 4px; height: 4px; }
+    @keyframes drift {
+      0%   { transform: translateY(0)   rotate(0deg);   opacity: 0; }
+      10%  { opacity: 0.8; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ══ Pixel mountains silhouette ══ */
+    .mountains {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 1;
+      height: 120px;
+    }
+
+    /* ══ Layout ══ */
+    .page-shell {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+
+    .outer-frame {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+    }
+
+   
+    .level-badge {
+      position: absolute;
+      top: -18px; left: 24px;
+      background: var(--teal);
+      color: #001a12;
+      font-size: 5px;
+      padding: 5px 10px;
+      letter-spacing: 2px;
+      z-index: 3;
+      box-shadow: 3px 3px 0 #006040;
+    }
+
+    /* EXP bar */
+    .exp-strip {
+      position: absolute;
+      top: -8px; right: 24px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 3;
+    }
+    .exp-label {
+      font-size: 5px;
+      color: var(--gold);
+    }
+    .exp-track {
+      width: 80px; height: 6px;
+      background: #1a0a2e;
+      border: 2px solid #4a2060;
+    }
+    .exp-fill {
+      height: 100%;
+      width: 0%;
+      background: repeating-linear-gradient(90deg, var(--gold) 0px, var(--gold) 3px, #E6A800 3px, #E6A800 6px);
+      animation: expLoad 2s ease-out 0.5s forwards;
+    }
+    @keyframes expLoad { to { width: 35%; } }
+    .glow-panel {
+      background: var(--panel);
+      border: 4px solid var(--border);
+      box-shadow:
+        0 0 0 2px #0a0030,
+        0 0 0 6px #4a1090,
+        0 0 0 10px #0a0030,
+        inset 0 0 40px rgba(124,77,255,0.06);
+      padding: 36px 36px 30px;
+      position: relative;
+      animation: framePulse 5s ease-in-out infinite;
+    }
+    @keyframes framePulse {
+      0%, 100% { box-shadow: 0 0 0 2px #0a0030, 0 0 0 6px #4a1090, 0 0 0 10px #0a0030, inset 0 0 40px rgba(124,77,255,0.06); }
+      50%       { box-shadow: 0 0 0 2px #0a0030, 0 0 0 6px var(--pink), 0 0 0 10px #0a0030, 0 0 60px rgba(255,110,180,0.15), inset 0 0 40px rgba(255,110,180,0.08); }
+    }
+
+    /* Ornate corner pieces */
+    .corner { position: absolute; width: 20px; height: 20px; }
+    .corner.tl { top: -4px;    left: -4px; }
+    .corner.tr { top: -4px;    right: -4px; transform: scaleX(-1); }
+    .corner.bl { bottom: -4px; left: -4px;  transform: scaleY(-1); }
+    .corner.br { bottom: -4px; right: -4px; transform: scale(-1,-1); }
+
+    /* Big chibi character — standing beside panel */
+    .chibi-wrap {
+      position: absolute;
+      top: -120px;
+      right: -16px;
+      width: 100px;
+      height: 120px;
+    }
+
+
+    .logo-wrap {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .logo-jp {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 9px;
+      font-weight: 300;
+      color: rgba(255,213,79,0.5);
+      letter-spacing: 6px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--gold);
+      line-height: 1.8;
+      letter-spacing: 1px;
+      text-shadow: 3px 3px 0 #7A5500, 0 0 20px rgba(255,213,79,0.5);
+    }
+    .logo-sub {
+      font-size: 5px;
+      color: var(--pink);
+      letter-spacing: 3px;
+      margin-top: 6px;
+      text-shadow: 0 0 10px rgba(255,110,180,0.8);
+      display: block;
+    }
+
+    /* ══ Dividers ══ */
+    .divider-top {
+      width: 100%;
+      height: 4px;
+      margin: 16px 0;
+      background: repeating-linear-gradient(90deg,
+        transparent 0px, transparent 4px,
+        var(--border) 4px, var(--border) 8px,
+        transparent 8px, transparent 12px,
+        var(--pink) 12px, var(--pink) 16px
+      );
+    }
+    .divider-bottom {
+      width: 100%;
+      height: 4px;
+      margin: 16px 0;
+      background: repeating-linear-gradient(90deg,
+        transparent 0px, transparent 4px,
+        var(--cyan) 4px, var(--cyan) 8px,
+        transparent 8px, transparent 12px,
+        var(--teal) 12px, var(--teal) 16px
+      );
+    }
+
+    
+    .tagline {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 10px;
+      color: rgba(179,157,219,0.8);
+      text-align: center;
+      line-height: 1.9;
+      padding: 0 12px;
+      position: relative;
+    }
+    .tagline::before { content: '「'; color: var(--pink); font-size: 16px; margin-right: 4px; }
+    .tagline::after  { content: '」'; color: var(--pink); font-size: 16px; margin-left: 4px; }
+
+    /* ══ Form ══ */
+    .form-grid { margin-top: 4px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .field-block { display: flex; flex-direction: column; }
+    .field-block.full { grid-column: 1 / -1; }
+
+    .px-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      color: var(--cyan);
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 7px;
+      text-shadow: 0 0 6px rgba(0,229,255,0.5);
+    }
+    .px-label .lbl-icon { color: var(--gold); margin-right: 4px; }
+
+    .input-glow {
+      width: 100%;
+      background: rgba(4, 0, 18, 0.9);
+      border: 3px solid #4a2080;
+      color: #e8e0ff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      padding: 10px 10px;
+      outline: none;
+      letter-spacing: 1px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      display: block;
+      margin-bottom: 14px;
+    }
+    .input-glow:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 14px rgba(0,229,255,0.35), inset 0 0 8px rgba(0,229,255,0.05);
+    }
+    .input-glow::placeholder {
+      color: rgba(124,77,255,0.4);
+      font-size: 5px;
+    }
+
+    /* File input special styling */
+    .file-wrapper {
+      position: relative;
+      margin-bottom: 14px;
+    }
+    .file-wrapper input[type="file"] {
+      width: 100%;
+      background: rgba(4, 0, 18, 0.9);
+      border: 3px dashed #7C4DFF;
+      color: var(--purple);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      padding: 14px 10px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: block;
+      letter-spacing: 1px;
+    }
+    .file-wrapper input[type="file"]:hover {
+      border-color: var(--pink);
+      box-shadow: 0 0 14px rgba(255,110,180,0.25);
+    }
+    .file-hint {
+      font-size: 5px;
+      color: rgba(179,157,219,0.45);
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* Avatar preview pixel frame */
+    .avatar-preview {
+      width: 52px; height: 52px;
+      border: 3px solid #4a2080;
+      background: rgba(4,0,18,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar-preview::after {
+      content: '?';
+      font-size: 16px;
+      color: rgba(124,77,255,0.4);
+    }
+    .avatar-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .avatar-row .file-wrapper { flex: 1; }
+
+    /* Stats strip */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0 16px;
+    }
+    .stat-box {
+      background: rgba(124,77,255,0.08);
+      border: 2px solid #3a1060;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .stat-name {
+      font-size: 4px;
+      color: var(--cyan);
+      display: block;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+    .stat-bar-track {
+      width: 100%;
+      height: 5px;
+      background: #1a0a2e;
+      margin-bottom: 4px;
+      border: 1px solid #2a1040;
+    }
+    .stat-bar-fill {
+      height: 100%;
+      width: 0%;
+    }
+    .stat-bar-fill.str { background: var(--pink);  animation: statLoad 1.2s ease-out 0.8s forwards; }
+    .stat-bar-fill.mag { background: var(--cyan);  animation: statLoad 1.2s ease-out 1.0s forwards; }
+    .stat-bar-fill.spd { background: var(--teal);  animation: statLoad 1.2s ease-out 1.2s forwards; }
+    @keyframes statLoad {
+      to { width: var(--w); }
+    }
+    .stat-bar-fill.str { --w: 60%; }
+    .stat-bar-fill.mag { --w: 80%; }
+    .stat-bar-fill.spd { --w: 45%; }
+    .stat-val {
+      font-size: 5px;
+      color: var(--gold);
+    }
+
+    /* ══ Buttons ══ */
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .btn {
+      flex: 1;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      padding: 13px 6px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.7;
+      transition: transform 0.1s, filter 0.1s;
+    }
+    .btn:active { transform: translate(2px, 2px); }
+
+    .btn-primary {
+      background: var(--teal);
+      color: #001a12;
+      box-shadow: 4px 4px 0 #007050;
+      text-shadow: none;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.15);
+      box-shadow: 4px 4px 0 #007050, 0 0 20px rgba(29,233,182,0.5);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--pink);
+      border: 3px solid var(--pink);
+      box-shadow: 3px 3px 0 #7a0040;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,110,180,0.08);
+      filter: brightness(1.2);
+    }
+
+    /* ══ Footer ══ */
+    .footer-note {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      color: rgba(124,77,255,0.5);
+      text-align: center;
+      margin-top: 18px;
+      line-height: 2.2;
+    }
+    .seal-icon { color: var(--teal); animation: sealSpin 4s linear infinite; display: inline-block; }
+    @keyframes sealSpin { to { transform: rotate(360deg); } }
+
+    /* ══ Entrance animation ══ */
+    .outer-frame {
+      animation: slideUp 0.6s cubic-bezier(0.23,1,0.32,1) both;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ── Pixel loading screen ── */
+    .pixel-loader {
+      position: fixed; inset: 0; z-index: 99999;
+      background: var(--dark);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .pixel-loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+    .pl-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .pl-sprite { display: flex; gap: 6px; }
+    .pl-sprite span { width: 10px; height: 10px; animation: plBounce 0.9s ease-in-out infinite; }
+    .pl-sprite span:nth-child(1) { background: var(--pink); box-shadow: 0 0 8px var(--pink); animation-delay: 0s; }
+    .pl-sprite span:nth-child(2) { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation-delay: 0.12s; }
+    .pl-sprite span:nth-child(3) { background: var(--gold); box-shadow: 0 0 8px var(--gold); animation-delay: 0.24s; }
+    .pl-sprite span:nth-child(4) { background: var(--teal); box-shadow: 0 0 8px var(--teal); animation-delay: 0.36s; }
+    @keyframes plBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.6; } 30% { transform: translateY(-14px); opacity: 1; } }
+    .pl-bar { width: 160px; height: 8px; background: #1a0a2e; border: 2px solid var(--border); overflow: hidden; }
+    .pl-bar-fill { height: 100%; width: 0%; background: repeating-linear-gradient(90deg, var(--pink) 0px, var(--pink) 4px, var(--gold) 4px, var(--gold) 8px); animation: plFill 1.3s ease-in-out infinite; }
+    @keyframes plFill { 0% { width: 0%; } 50% { width: 100%; } 100% { width: 0%; } }
+    .pl-text { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--gold); letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,213,79,0.6); }
+    .pl-dots { animation: plBlink 1s steps(1) infinite; }
+    @keyframes plBlink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+
+  <!-- Pixel loading screen -->
+  <div class="pixel-loader" id="pixelLoader">
+    <div class="pl-inner">
+      <div class="pl-sprite"><span></span><span></span><span></span><span></span></div>
+      <div class="pl-bar"><div class="pl-bar-fill"></div></div>
+      <div class="pl-text">FORGING HERO<span class="pl-dots">...</span></div>
+    </div>
+  </div>
+
+  <!-- Sky & atmosphere -->
+  <div class="sky"></div>
+
+  <!-- Floating petals -->
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+
+  <!-- Moon -->
+  <div class="moon"></div>
+
+  <!-- Pixel torii gate -->
+  <svg class="torii" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Pillars -->
+    <rect x="36"  y="20" width="20" height="100" fill="#CC2200"/>
+    <rect x="264" y="20" width="20" height="100" fill="#CC2200"/>
+    <!-- Top beams -->
+    <rect x="8"   y="12" width="304" height="16" fill="#DD2200"/>
+    <rect x="20"  y="28" width="280" height="10" fill="#DD2200"/>
+    <rect x="20"  y="28" width="280" height="4"  fill="#EE3311" opacity="0.5"/>
+    <!-- Curve beam (pixel art approximation) -->
+    <rect x="8"   y="8"  width="16"  height="8"  fill="#DD2200"/>
+    <rect x="296" y="8"  width="16"  height="8"  fill="#DD2200"/>
+    <!-- Inner crossbar -->
+    <rect x="36"  y="52" width="248" height="8" fill="#BB1F00"/>
+    <!-- Pillar bases -->
+    <rect x="28"  y="112" width="36" height="8" fill="#AA1A00"/>
+    <rect x="256" y="112" width="36" height="8" fill="#AA1A00"/>
+    <!-- Lantern left -->
+    <rect x="44"  y="62" width="12" height="16" fill="#FFD54F"/>
+    <rect x="42"  y="60" width="16" height="4"  fill="#E8A800"/>
+    <rect x="42"  y="78" width="16" height="4"  fill="#E8A800"/>
+    <rect x="49"  y="56" width="2"  height="4"  fill="#E8A800"/>
+    <!-- Lantern right -->
+    <rect x="264" y="62" width="12" height="16" fill="#FFD54F"/>
+    <rect x="262" y="60" width="16" height="4"  fill="#E8A800"/>
+    <rect x="262" y="78" width="16" height="4"  fill="#E8A800"/>
+    <rect x="269" y="56" width="2"  height="4"  fill="#E8A800"/>
+  </svg>
+
+  <!-- Pixel mountains -->
+  <svg class="mountains" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="0,120 0,60 80,30 160,60 240,20 320,50 400,10 480,45 560,5 640,40 720,15 800,50 880,25 960,55 1040,20 1120,45 1200,30 1200,120" fill="#0a0030" opacity="0.8"/>
+    <polygon points="0,120 0,80 100,55 200,75 300,45 400,70 500,35 600,65 700,40 800,70 900,50 1000,72 1100,48 1200,65 1200,120" fill="#0d0040" opacity="0.9"/>
+  </svg>
+
+  <!-- Page -->
+  <div class="page-shell">
+    <div class="outer-frame">
+
+      <!-- Level badge -->
+      <div class="level-badge">★ NEW HERO CREATION ★</div>
+
+      <!-- EXP bar -->
+      <div class="exp-strip">
+        <span class="exp-label">EXP</span>
+        <div class="exp-track"><div class="exp-fill"></div></div>
+        <span class="exp-label">35%</span>
+      </div>
+
+      <div class="glow-panel">
+
+        <!-- Corner ornaments -->
+        <svg class="corner tl" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0"  y="0"  width="8" height="4" fill="#00E5FF"/>
+          <rect x="0"  y="4"  width="4" height="8" fill="#00E5FF"/>
+          <rect x="4"  y="4"  width="4" height="4" fill="#7C4DFF"/>
+          <rect x="8"  y="0"  width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0"  y="12" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+        <svg class="corner tr" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0"  y="0"  width="8" height="4" fill="#00E5FF"/>
+          <rect x="0"  y="4"  width="4" height="8" fill="#00E5FF"/>
+          <rect x="4"  y="4"  width="4" height="4" fill="#7C4DFF"/>
+          <rect x="8"  y="0"  width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0"  y="12" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+        <svg class="corner bl" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0"  y="0"  width="8" height="4" fill="#00E5FF"/>
+          <rect x="0"  y="4"  width="4" height="8" fill="#00E5FF"/>
+          <rect x="4"  y="4"  width="4" height="4" fill="#7C4DFF"/>
+          <rect x="8"  y="0"  width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0"  y="12" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+        <svg class="corner br" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0"  y="0"  width="8" height="4" fill="#00E5FF"/>
+          <rect x="0"  y="4"  width="4" height="8" fill="#00E5FF"/>
+          <rect x="4"  y="4"  width="4" height="4" fill="#7C4DFF"/>
+          <rect x="8"  y="0"  width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0"  y="12" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+
+        <!-- Chibi mage character -->
+        <svg class="chibi-wrap" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Hat -->
+          <rect x="34" y="4"  width="4"  height="4"  fill="#1DE9B6"/>
+          <rect x="30" y="8"  width="12" height="4"  fill="#1DE9B6"/>
+          <rect x="26" y="12" width="20" height="4"  fill="#00BFA5"/>
+          <rect x="22" y="16" width="28" height="4"  fill="#1DE9B6"/>
+          <rect x="18" y="18" width="36" height="4"  fill="#00BFA5"/>
+          <!-- Hat star -->
+          <rect x="36" y="6"  width="4" height="4" fill="#FFD54F" opacity="0.9"/>
+          <!-- Head -->
+          <rect x="26" y="22" width="20" height="20" fill="#FFD0A8"/>
+          <!-- Hair -->
+          <rect x="22" y="22" width="4"  height="16" fill="#1a0060"/>
+          <rect x="46" y="22" width="4"  height="16" fill="#1a0060"/>
+          <rect x="22" y="18" width="28" height="4"  fill="#1a0060"/>
+          <!-- Eyes (big anime) -->
+          <rect x="28" y="28" width="6" height="6"  fill="#4FC3F7"/>
+          <rect x="38" y="28" width="6" height="6"  fill="#4FC3F7"/>
+          <rect x="29" y="29" width="2" height="2"  fill="#0a0050"/>
+          <rect x="39" y="29" width="2" height="2"  fill="#0a0050"/>
+          <rect x="30" y="28" width="2" height="2"  fill="#fff" opacity="0.7"/>
+          <rect x="40" y="28" width="2" height="2"  fill="#fff" opacity="0.7"/>
+          <rect x="26" y="26" width="10" height="2" fill="#0a0050"/>
+          <rect x="36" y="26" width="10" height="2" fill="#0a0050"/>
+          <!-- Mouth -->
+          <rect x="32" y="36" width="8" height="2" fill="#E8907A"/>
+          <!-- Body — robe -->
+          <rect x="22" y="42" width="28" height="28" fill="#4527A0"/>
+          <rect x="18" y="42" width="4"  height="22" fill="#311B92"/>
+          <rect x="50" y="42" width="4"  height="22" fill="#311B92"/>
+          <!-- Robe detail -->
+          <rect x="34" y="42" width="4"  height="28" fill="#5E35B1" opacity="0.5"/>
+          <rect x="22" y="42" width="28" height="4"  fill="#00E5FF" opacity="0.4"/>
+          <!-- Staff -->
+          <rect x="56" y="10" width="4" height="60" fill="#7B3F6E"/>
+          <rect x="52" y="8"  width="4" height="4"  fill="#FFD54F"/>
+          <rect x="56" y="4"  width="4" height="8"  fill="#FFD54F"/>
+          <rect x="60" y="8"  width="4" height="4"  fill="#FFD54F"/>
+          <rect x="54" y="2"  width="8" height="4"  fill="#FFF176"/>
+          <!-- Staff glow -->
+          <rect x="52" y="0"  width="12" height="4" fill="#FFF176" opacity="0.5"/>
+          <!-- Legs -->
+          <rect x="26" y="70" width="10" height="16" fill="#4527A0"/>
+          <rect x="36" y="70" width="10" height="16" fill="#311B92"/>
+          <!-- Boots -->
+          <rect x="22" y="84" width="16" height="6"  fill="#1a0a3e"/>
+          <rect x="34" y="84" width="16" height="6"  fill="#150830"/>
+          <!-- Magic sparkles -->
+          <rect x="64" y="2"  width="4" height="4" fill="#00E5FF" opacity="0.8"/>
+          <rect x="70" y="8"  width="2" height="2" fill="#FFD54F" opacity="0.9"/>
+          <rect x="66" y="14" width="2" height="2" fill="#FF6EB4" opacity="0.7"/>
+          <rect x="72" y="18" width="4" height="4" fill="#1DE9B6" opacity="0.6"/>
+        </svg>
+
+        <!-- Logo -->
+        <div class="logo-wrap">
+          <span class="logo-jp">忘却の残響</span>
+          <div class="logo">ECHOES OF<br>OBLIVION</div>
+          <span class="logo-sub">◆ HERO REGISTRATION ◆</span>
+        </div>
+
+        <div class="divider-top"></div>
+
+        <p class="tagline">Join the academy of the forgotten. Create your avatar and step into an anime-inspired landscape of mystery.</p>
+
+        <div class="divider-bottom"></div>
+
+        <!-- Base stats preview -->
+        <div class="stats-strip">
+          <div class="stat-box">
+            <span class="stat-name">STR</span>
+            <div class="stat-bar-track"><div class="stat-bar-fill str"></div></div>
+            <span class="stat-val">60</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-name">MAG</span>
+            <div class="stat-bar-track"><div class="stat-bar-fill mag"></div></div>
+            <span class="stat-val">80</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-name">SPD</span>
+            <div class="stat-bar-track"><div class="stat-bar-fill spd"></div></div>
+            <span class="stat-val">45</span>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="form-grid">
+          <form method="POST" action="/signup" id="userCredentials" name="userCredentials" enctype="multipart/form-data">
+            <div class="form-grid">
+
+              <!-- Name + Email in a row -->
+              <div class="field-row">
+                <div class="field-block">
+                  <label class="px-label" for="Name"><span class="lbl-icon">⚔</span> HERO NAME</label>
+                  <input class="input-glow" type="text" name="Name" id="Name" placeholder="e.g. Kira Shadowblade" required>
+                </div>
+                <div class="field-block">
+                  <label class="px-label" for="email"><span class="lbl-icon">✉</span> EMAIL</label>
+                  <input class="input-glow" type="email" name="email" id="email" placeholder="hero@realm.net" required>
+                </div>
+              </div>
+
+              <!-- Password full width -->
+              <label class="px-label" for="Pswd"><span class="lbl-icon">🔒</span> SECRET SEAL</label>
+              <input class="input-glow" type="password" name="Pswd" id="Pswd" placeholder="Min 8 characters" required>
+
+              <!-- Photo upload -->
+              <label class="px-label" for="image"><span class="lbl-icon">◈</span> AVATAR PHOTO</label>
+              <div class="avatar-row">
+                <div class="avatar-preview" id="avatarPreview"></div>
+                <div class="file-wrapper">
+                  <input class="input-glow" type="file" name="image" id="image" accept="image/*" required>
+                  <span class="file-hint">▸ JPG / PNG / WEBP · MAX 5MB</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit" id="save" name="save">▶ CONFIRM<br>REGISTRATION</button>
+              <button class="btn btn-secondary" type="button" onclick="location.href='/signin'">◀ ALREADY A<br>TRAVELER?</button>
+            </div>
+          </form>
+        </div>
+
+        <p class="footer-note">
+          <span class="seal-icon">◈</span> YOUR DATA IS PROTECTED BY ANCIENT SEALS <span class="seal-icon">◈</span>
+          <br>WELCOME TO THE VOYAGE
+        </p>
+
+      </div><!-- /.glow-panel -->
+    </div><!-- /.outer-frame -->
+  </div><!-- /.page-shell -->
+
+  <script>
+    // Live avatar preview
+    document.getElementById('image').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const preview = document.getElementById('avatarPreview');
+        preview.style.cssText = 'background-image:url(' + ev.target.result + ');background-size:cover;background-position:center;';
+        preview.style.setProperty('--after-content', 'none');
+        // hide the ? pseudo-element
+        preview.classList.add('has-image');
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+  <style>
+    .avatar-preview.has-image::after { display: none; }
+  </style>
+  <script>
+    window.addEventListener('load', function () {
+      var l = document.getElementById('pixelLoader');
+      if (!l) return;
+      setTimeout(function () {
+        l.classList.add('hide');
+        setTimeout(function () { l.remove(); }, 600);
+      }, 350);
+    });
+  </script>
+
+</body>
+</html>

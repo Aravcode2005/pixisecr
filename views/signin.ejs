@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%=pageTitle%></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      image-rendering: pixelated;
+    }
+
+    :root {
+      --px-pink: #FF6EB4;
+      --px-blue: #4FC3F7;
+      --px-purple: #B39DDB;
+      --px-dark: #0D0221;
+      --px-darker: #060114;
+      --px-gold: #FFD54F;
+      --px-cyan: #00E5FF;
+      --px-glow-pink: rgba(255,110,180,0.35);
+      --px-glow-blue: rgba(79,195,247,0.3);
+    }
+
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: var(--px-darker);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Stars background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(1px 1px at 10% 20%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 80% 10%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 50% 70%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 30% 55%, rgba(255,255,255,0.6) 100%, transparent),
+        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.6) 100%, transparent),
+        radial-gradient(1px 1px at 65% 40%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.5) 100%, transparent),
+        radial-gradient(1px 1px at 45% 15%, rgba(255,255,255,0.7) 100%, transparent),
+        radial-gradient(2px 2px at 75% 60%, rgba(79,195,247,0.8) 100%, transparent),
+        radial-gradient(2px 2px at 25% 35%, rgba(255,110,180,0.7) 100%, transparent),
+        radial-gradient(1px 1px at 55% 90%, rgba(255,255,255,0.4) 100%, transparent),
+        radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,0.5) 100%, transparent),
+        radial-gradient(1px 1px at 95% 30%, rgba(255,255,255,0.6) 100%, transparent);
+    }
+
+    /* ── Pixel Moon ── */
+    .pixel-moon {
+      position: fixed;
+      top: 28px;
+      right: 60px;
+      width: 4px;
+      height: 4px;
+      background: var(--px-gold);
+      box-shadow:
+        4px 0 0 var(--px-gold), 8px 0 0 var(--px-gold), 12px 0 0 var(--px-gold),
+        0 4px 0 var(--px-gold), 4px 4px 0 var(--px-gold), 8px 4px 0 var(--px-gold), 12px 4px 0 var(--px-gold), 16px 4px 0 var(--px-gold),
+        0 8px 0 var(--px-gold), 4px 8px 0 var(--px-gold), 8px 8px 0 var(--px-gold), 12px 8px 0 var(--px-gold), 16px 8px 0 var(--px-gold), 20px 8px 0 var(--px-gold),
+        -4px 12px 0 var(--px-gold), 0 12px 0 var(--px-gold), 4px 12px 0 var(--px-gold), 8px 12px 0 var(--px-gold), 12px 12px 0 var(--px-gold), 16px 12px 0 var(--px-gold), 20px 12px 0 var(--px-gold),
+        -4px 16px 0 var(--px-gold), 0 16px 0 var(--px-gold), 4px 16px 0 var(--px-gold), 8px 16px 0 var(--px-gold), 12px 16px 0 var(--px-gold), 16px 16px 0 var(--px-gold),
+        0 20px 0 var(--px-gold), 4px 20px 0 var(--px-gold), 8px 20px 0 var(--px-gold), 12px 20px 0 var(--px-gold),
+        4px 24px 0 rgba(255,213,79,0.4), 8px 24px 0 rgba(255,213,79,0.4);
+      z-index: 1;
+      animation: moonGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes moonGlow {
+      0%, 100% { filter: brightness(1); }
+      50%       { filter: brightness(1.3) drop-shadow(0 0 8px var(--px-gold)); }
+    }
+
+    /* ── Sakura trees ── */
+    .sakura-left,
+    .sakura-right {
+      position: fixed;
+      bottom: 0;
+      width: 90px;
+      z-index: 1;
+      opacity: 0.75;
+    }
+    .sakura-left  { left: 0; }
+    .sakura-right { right: 0; transform: scaleX(-1); }
+
+    /* ── Main panel ── */
+    .pixel-panel {
+      position: relative;
+      z-index: 2;
+      background: rgba(13, 2, 33, 0.93);
+      border: 4px solid var(--px-pink);
+      box-shadow:
+        0 0 0 4px var(--px-darker),
+        0 0 0 8px var(--px-purple),
+        inset 0 0 30px rgba(255,110,180,0.08);
+      padding: 32px 32px 28px;
+      width: 100%;
+      max-width: 420px;
+      animation: panelPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes panelPulse {
+      0%, 100% {
+        box-shadow: 0 0 0 4px var(--px-darker), 0 0 0 8px var(--px-purple), inset 0 0 30px rgba(255,110,180,0.08);
+      }
+      50% {
+        box-shadow: 0 0 0 4px var(--px-darker), 0 0 0 8px var(--px-pink), 0 0 40px rgba(255,110,180,0.25), inset 0 0 30px rgba(255,110,180,0.15);
+      }
+    }
+
+    /* Panel corner jewels */
+    .panel-corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--px-cyan);
+    }
+    .panel-corner.tl { top: -4px;    left: -4px; }
+    .panel-corner.tr { top: -4px;    right: -4px; }
+    .panel-corner.bl { bottom: -4px; left: -4px; }
+    .panel-corner.br { bottom: -4px; right: -4px; }
+
+    /* Chibi anime character */
+    .anime-char {
+      position: absolute;
+      top: -84px;
+      right: -8px;
+      width: 76px;
+      height: 84px;
+    }
+
+    /* Logo */
+    .game-logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--px-gold);
+      text-align: center;
+      line-height: 1.9;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0 #8B6914, 0 0 12px rgba(255,213,79,0.6);
+      margin-bottom: 6px;
+    }
+
+    .logo-sub {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      color: var(--px-pink);
+      text-align: center;
+      letter-spacing: 3px;
+      margin-bottom: 18px;
+      text-shadow: 0 0 8px rgba(255,110,180,0.7);
+    }
+
+    /* HP bar */
+    .hp-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .hp-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      color: var(--px-gold);
+      white-space: nowrap;
+    }
+    .hp-track {
+      flex: 1;
+      height: 8px;
+      background: #1a0a2e;
+      border: 2px solid #4a2060;
+      overflow: hidden;
+    }
+    .hp-fill {
+      height: 100%;
+      width: 78%;
+      background: repeating-linear-gradient(
+        90deg,
+        #FF6EB4 0px, #FF6EB4 4px,
+        #FF85C0 4px, #FF85C0 8px
+      );
+      animation: hpPulse 2s steps(1) infinite;
+    }
+    @keyframes hpPulse {
+      0%, 80% { opacity: 1; }
+      90%      { opacity: 0.6; }
+      100%     { opacity: 1; }
+    }
+
+    /* Pixel divider */
+    .pixel-divider {
+      width: 100%;
+      height: 4px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--px-pink) 0px, var(--px-pink) 4px,
+        transparent 4px, transparent 8px
+      );
+      margin-bottom: 16px;
+    }
+
+    /* Tagline */
+    .tagline {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 10px;
+      color: rgba(179,157,219,0.85);
+      text-align: center;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      border-left: 3px solid var(--px-pink);
+      border-right: 3px solid var(--px-pink);
+      padding: 0 10px;
+    }
+
+    /* Form elements */
+    .px-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      color: var(--px-cyan);
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 7px;
+      text-shadow: 0 0 6px rgba(0,229,255,0.5);
+    }
+
+    .input-glow {
+      width: 100%;
+      background: rgba(6, 1, 20, 0.9);
+      border: 3px solid var(--px-purple);
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      padding: 11px 12px;
+      outline: none;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      display: block;
+    }
+    .input-glow:focus {
+      border-color: var(--px-pink);
+      box-shadow: 0 0 12px rgba(255,110,180,0.4), inset 0 0 8px rgba(255,110,180,0.05);
+    }
+    .input-glow::placeholder {
+      color: rgba(179,157,219,0.4);
+      font-size: 6px;
+    }
+
+    /* Buttons */
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      padding: 12px 6px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-align: center;
+      transition: transform 0.1s, filter 0.1s;
+      line-height: 1.7;
+    }
+    .btn:active { transform: translate(2px, 2px); }
+
+    .btn-primary {
+      background: var(--px-pink);
+      color: #0D0221;
+      box-shadow: 4px 4px 0 #8B2252;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.15);
+      box-shadow: 4px 4px 0 #8B2252, 0 0 16px rgba(255,110,180,0.5);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--px-cyan);
+      border: 3px solid var(--px-cyan);
+      box-shadow: 3px 3px 0 #006080;
+    }
+    .btn-secondary:hover {
+      background: rgba(0,229,255,0.08);
+      filter: brightness(1.2);
+    }
+
+    /* Footer */
+    .footer-note {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      color: rgba(179,157,219,0.45);
+      text-align: center;
+      margin-top: 18px;
+      line-height: 2.2;
+    }
+
+    .blink-cursor {
+      animation: blink 1s steps(1) infinite;
+      color: var(--px-pink);
+      font-size: 8px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── Pixel loading screen ── */
+    .pixel-loader {
+      position: fixed; inset: 0; z-index: 99999;
+      background: var(--px-darker);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .pixel-loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+    .pl-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .pl-sprite { display: flex; gap: 6px; }
+    .pl-sprite span { width: 10px; height: 10px; animation: plBounce 0.9s ease-in-out infinite; }
+    .pl-sprite span:nth-child(1) { background: var(--px-pink); box-shadow: 0 0 8px var(--px-pink); animation-delay: 0s; }
+    .pl-sprite span:nth-child(2) { background: var(--px-cyan); box-shadow: 0 0 8px var(--px-cyan); animation-delay: 0.12s; }
+    .pl-sprite span:nth-child(3) { background: var(--px-gold); box-shadow: 0 0 8px var(--px-gold); animation-delay: 0.24s; }
+    .pl-sprite span:nth-child(4) { background: var(--px-purple); box-shadow: 0 0 8px var(--px-purple); animation-delay: 0.36s; }
+    @keyframes plBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.6; } 30% { transform: translateY(-14px); opacity: 1; } }
+    .pl-bar { width: 160px; height: 8px; background: #1a0a2e; border: 2px solid var(--px-purple); overflow: hidden; }
+    .pl-bar-fill { height: 100%; width: 0%; background: repeating-linear-gradient(90deg, var(--px-pink) 0px, var(--px-pink) 4px, var(--px-gold) 4px, var(--px-gold) 8px); animation: plFill 1.3s ease-in-out infinite; }
+    @keyframes plFill { 0% { width: 0%; } 50% { width: 100%; } 100% { width: 0%; } }
+    .pl-text { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--px-gold); letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,213,79,0.6); }
+    .pl-dots { animation: plBlink 1s steps(1) infinite; }
+    @keyframes plBlink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+
+  <!-- Pixel loading screen -->
+  <div class="pixel-loader" id="pixelLoader">
+    <div class="pl-inner">
+      <div class="pl-sprite"><span></span><span></span><span></span><span></span></div>
+      <div class="pl-bar"><div class="pl-bar-fill"></div></div>
+      <div class="pl-text">ENTERING REALM<span class="pl-dots">...</span></div>
+    </div>
+  </div>
+
+  <!-- Pixel moon -->
+  <div class="pixel-moon"></div>
+
+  <!-- Sakura tree left -->
+  <svg class="sakura-left" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="40" y="110" width="4" height="30" fill="#7B3F6E"/>
+    <rect x="36" y="88"  width="4" height="28" fill="#7B3F6E" transform="rotate(-10 36 88)"/>
+    <rect x="44" y="84"  width="4" height="32" fill="#7B3F6E" transform="rotate(8 44 84)"/>
+    <rect x="8"  y="72" width="16" height="8" fill="#FF9EC0"/>
+    <rect x="4"  y="76" width="8"  height="8" fill="#FF9EC0"/>
+    <rect x="16" y="66" width="8"  height="8" fill="#FFB8D1"/>
+    <rect x="24" y="60" width="16" height="8" fill="#FF9EC0"/>
+    <rect x="20" y="64" width="8"  height="8" fill="#FFB8D1"/>
+    <rect x="36" y="54" width="16" height="8" fill="#FF9EC0"/>
+    <rect x="32" y="58" width="8"  height="8" fill="#FF9EC0"/>
+    <rect x="52" y="48" width="16" height="8" fill="#FFB8D1"/>
+    <rect x="48" y="52" width="8"  height="8" fill="#FF9EC0"/>
+    <rect x="2"  y="84" width="8"  height="4" fill="#FF9EC0" opacity="0.5"/>
+    <rect x="22" y="80" width="4"  height="4" fill="#FFB8D1" opacity="0.6"/>
+    <rect x="56" y="62" width="4"  height="4" fill="#FF9EC0" opacity="0.5"/>
+  </svg>
+
+  <!-- Sakura tree right -->
+  <svg class="sakura-right" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="40" y="110" width="4" height="30" fill="#7B3F6E"/>
+    <rect x="36" y="88"  width="4" height="28" fill="#7B3F6E" transform="rotate(-10 36 88)"/>
+    <rect x="44" y="84"  width="4" height="32" fill="#7B3F6E" transform="rotate(8 44 84)"/>
+    <rect x="8"  y="72" width="16" height="8" fill="#FF9EC0"/>
+    <rect x="4"  y="76" width="8"  height="8" fill="#FF9EC0"/>
+    <rect x="16" y="66" width="8"  height="8" fill="#FFB8D1"/>
+    <rect x="24" y="60" width="16" height="8" fill="#FF9EC0"/>
+    <rect x="20" y="64" width="8"  height="8" fill="#FFB8D1"/>
+    <rect x="36" y="54" width="16" height="8" fill="#FF9EC0"/>
+    <rect x="32" y="58" width="8"  height="8" fill="#FF9EC0"/>
+    <rect x="52" y="48" width="16" height="8" fill="#FFB8D1"/>
+    <rect x="48" y="52" width="8"  height="8" fill="#FF9EC0"/>
+  </svg>
+
+  <!-- Main login panel -->
+  <div class="pixel-panel">
+    <div class="panel-corner tl"></div>
+    <div class="panel-corner tr"></div>
+    <div class="panel-corner bl"></div>
+    <div class="panel-corner br"></div>
+
+    <!-- Chibi character sprite (SVG pixel art) -->
+    <svg class="anime-char" viewBox="0 0 72 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Body -->
+      <rect x="24" y="28" width="24" height="24" fill="#8C52E8"/>
+      <rect x="20" y="28" width="4"  height="20" fill="#6B3DB0"/>
+      <rect x="48" y="28" width="4"  height="20" fill="#6B3DB0"/>
+      <rect x="24" y="28" width="24" height="4"  fill="#FF6EB4"/>
+      <!-- Legs -->
+      <rect x="28" y="52" width="8" height="16" fill="#8C52E8"/>
+      <rect x="36" y="52" width="8" height="16" fill="#7040C0"/>
+      <rect x="24" y="66" width="12" height="4" fill="#2D1B6E"/>
+      <rect x="36" y="66" width="12" height="4" fill="#2D1B6E"/>
+      <!-- Head -->
+      <rect x="24" y="4"  width="24" height="24" fill="#FFD0A8"/>
+      <!-- Hair -->
+      <rect x="20" y="4"  width="4"  height="20" fill="#2D1B6E"/>
+      <rect x="48" y="4"  width="4"  height="20" fill="#2D1B6E"/>
+      <rect x="20" y="0"  width="32" height="8"  fill="#2D1B6E"/>
+      <rect x="16" y="4"  width="4"  height="4"  fill="#2D1B6E"/>
+      <rect x="52" y="4"  width="4"  height="4"  fill="#2D1B6E"/>
+      <!-- Eyes -->
+      <rect x="28" y="16" width="4" height="4" fill="#1A0A3E"/>
+      <rect x="40" y="16" width="4" height="4" fill="#1A0A3E"/>
+      <rect x="26" y="14" width="8" height="2" fill="#1A0A3E"/>
+      <rect x="38" y="14" width="8" height="2" fill="#1A0A3E"/>
+      <!-- Mouth -->
+      <rect x="32" y="22" width="8" height="2" fill="#E8A080"/>
+      <!-- Star accessory -->
+      <rect x="56" y="30" width="4" height="4" fill="#FFD54F"/>
+      <rect x="60" y="28" width="4" height="4" fill="#FFD54F"/>
+      <rect x="58" y="26" width="4" height="4" fill="#FFE082" opacity="0.7"/>
+    </svg>
+
+    <!-- Title -->
+    <div class="game-logo">ECHOES OF<br>OBLIVION</div>
+    <div class="logo-sub">◆ LOST REALM CHRONICLES ◆</div>
+
+    <!-- HP bar -->
+    <div class="hp-bar">
+      <span class="hp-label">HERO HP</span>
+      <div class="hp-track"><div class="hp-fill"></div></div>
+      <span class="hp-label">78/100</span>
+    </div>
+
+    <div class="pixel-divider"></div>
+
+    <p class="tagline">Sign in to continue your journey into the lost realm. Your legend awaits beyond the shimmering gate.</p>
+
+    <!-- Form -->
+    <div class="form-grid">
+      <form method="POST" action="/signin" id="userCredentials" name="userCredentials">
+        <div class="form-grid">
+          <label class="px-label" for="email">▶ EMAIL ADDRESS</label>
+          <input class="input-glow" type="email" name="email" id="email" placeholder="hero@realm.net" required>
+
+          <label class="px-label" for="Pswd">▶ PASSWORD</label>
+          <input class="input-glow" type="password" name="Pswd" id="Pswd" placeholder="••••••••" required>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" id="save" name="save">▶ ENTER<br>THE REALM</button>
+          <button class="btn btn-secondary" type="button" onclick="location.href='/signup'">+ CREATE<br>ACCOUNT</button>
+        </div>
+      </form>
+    </div>
+
+    <p class="footer-note">★ NEED HELP? CONTACT THE GUILD ★<br><span class="blink-cursor">_</span></p>
+  </div>
+
+  <script>
+    window.addEventListener('load', function () {
+      var l = document.getElementById('pixelLoader');
+      if (!l) return;
+      setTimeout(function () {
+        l.classList.add('hide');
+        setTimeout(function () { l.remove(); }, 600);
+      }, 350);
+    });
+  </script>
+
+</body>
+</html>

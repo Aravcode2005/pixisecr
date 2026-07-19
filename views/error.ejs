@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%=pageTitle%></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      image-rendering: pixelated;
+    }
+
+    :root {
+      --px-pink: #FF6EB4;
+      --px-blue: #4FC3F7;
+      --px-purple: #B39DDB;
+      --px-dark: #0D0221;
+      --px-darker: #060114;
+      --px-gold: #FFD54F;
+      --px-cyan: #00E5FF;
+      --px-glow-pink: rgba(255,110,180,0.35);
+    }
+
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: var(--px-darker);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(1px 1px at 10% 20%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 80% 10%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 50% 70%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 30% 55%, rgba(255,255,255,0.6) 100%, transparent),
+        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.6) 100%, transparent),
+        radial-gradient(2px 2px at 75% 60%, rgba(79,195,247,0.8) 100%, transparent),
+        radial-gradient(2px 2px at 25% 35%, rgba(255,110,180,0.7) 100%, transparent);
+    }
+
+    .glitch-icon {
+      font-size: 40px;
+      text-align: center;
+      color: var(--px-pink);
+      text-shadow: 0 0 20px rgba(255,110,180,0.7);
+      margin-bottom: 18px;
+      animation: glitch 2.4s infinite;
+    }
+    @keyframes glitch {
+      0%, 90%, 100% { transform: translate(0); opacity: 1; }
+      92% { transform: translate(-3px, 1px); opacity: 0.7; }
+      94% { transform: translate(3px, -1px); opacity: 1; }
+    }
+
+    .pixel-panel {
+      position: relative;
+      z-index: 2;
+      background: rgba(13, 2, 33, 0.93);
+      border: 4px solid var(--px-pink);
+      box-shadow:
+        0 0 0 4px var(--px-darker),
+        0 0 0 8px var(--px-purple),
+        inset 0 0 30px rgba(255,110,180,0.08);
+      padding: 36px 32px 30px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      animation: panelPulse 4s ease-in-out infinite;
+    }
+    @keyframes panelPulse {
+      0%, 100% { box-shadow: 0 0 0 4px var(--px-darker), 0 0 0 8px var(--px-purple), inset 0 0 30px rgba(255,110,180,0.08); }
+      50%       { box-shadow: 0 0 0 4px var(--px-darker), 0 0 0 8px var(--px-pink), 0 0 40px rgba(255,110,180,0.25), inset 0 0 30px rgba(255,110,180,0.15); }
+    }
+
+    .panel-corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--px-cyan);
+    }
+    .panel-corner.tl { top: -4px;    left: -4px; }
+    .panel-corner.tr { top: -4px;    right: -4px; }
+    .panel-corner.bl { bottom: -4px; left: -4px; }
+    .panel-corner.br { bottom: -4px; right: -4px; }
+
+    .game-logo {
+      font-size: 12px;
+      color: var(--px-gold);
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0 #8B6914, 0 0 12px rgba(255,213,79,0.6);
+      margin-bottom: 6px;
+    }
+
+    .logo-sub {
+      font-size: 5px;
+      color: var(--px-pink);
+      letter-spacing: 3px;
+      margin-bottom: 18px;
+      text-shadow: 0 0 8px rgba(255,110,180,0.7);
+    }
+
+    .pixel-divider {
+      width: 100%;
+      height: 4px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--px-pink) 0px, var(--px-pink) 4px,
+        transparent 4px, transparent 8px
+      );
+      margin-bottom: 18px;
+    }
+
+    .error-message {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 11px;
+      color: rgba(232, 224, 255, 0.9);
+      line-height: 1.9;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 6px;
+      padding: 12px 20px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.7;
+      background: var(--px-pink);
+      color: #0D0221;
+      box-shadow: 4px 4px 0 #8B2252;
+      transition: transform 0.1s, filter 0.1s;
+    }
+    .btn:hover { filter: brightness(1.15); box-shadow: 4px 4px 0 #8B2252, 0 0 16px rgba(255,110,180,0.5); }
+    .btn:active { transform: translate(2px, 2px); }
+
+    .footer-note {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      color: rgba(179,157,219,0.45);
+      text-align: center;
+      margin-top: 20px;
+      line-height: 2.2;
+    }
+
+    /* ── Pixel loading screen ── */
+    .pixel-loader {
+      position: fixed; inset: 0; z-index: 99999;
+      background: var(--px-darker);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .pixel-loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+    .pl-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .pl-sprite { display: flex; gap: 6px; }
+    .pl-sprite span { width: 10px; height: 10px; animation: plBounce 0.9s ease-in-out infinite; }
+    .pl-sprite span:nth-child(1) { background: var(--px-pink); box-shadow: 0 0 8px var(--px-pink); animation-delay: 0s; }
+    .pl-sprite span:nth-child(2) { background: var(--px-cyan); box-shadow: 0 0 8px var(--px-cyan); animation-delay: 0.12s; }
+    .pl-sprite span:nth-child(3) { background: var(--px-gold); box-shadow: 0 0 8px var(--px-gold); animation-delay: 0.24s; }
+    .pl-sprite span:nth-child(4) { background: var(--px-purple); box-shadow: 0 0 8px var(--px-purple); animation-delay: 0.36s; }
+    @keyframes plBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.6; } 30% { transform: translateY(-14px); opacity: 1; } }
+    .pl-bar { width: 160px; height: 8px; background: #1a0a2e; border: 2px solid var(--px-purple); overflow: hidden; }
+    .pl-bar-fill { height: 100%; width: 0%; background: repeating-linear-gradient(90deg, var(--px-pink) 0px, var(--px-pink) 4px, var(--px-gold) 4px, var(--px-gold) 8px); animation: plFill 1.3s ease-in-out infinite; }
+    @keyframes plFill { 0% { width: 0%; } 50% { width: 100%; } 100% { width: 0%; } }
+    .pl-text { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--px-gold); letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,213,79,0.6); }
+    .pl-dots { animation: plBlink 1s steps(1) infinite; }
+    @keyframes plBlink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+
+  <!-- Pixel loading screen -->
+  <div class="pixel-loader" id="pixelLoader">
+    <div class="pl-inner">
+      <div class="pl-sprite"><span></span><span></span><span></span><span></span></div>
+      <div class="pl-bar"><div class="pl-bar-fill"></div></div>
+      <div class="pl-text">RECALIBRATING<span class="pl-dots">...</span></div>
+    </div>
+  </div>
+
+  <div class="pixel-panel">
+    <div class="panel-corner tl"></div>
+    <div class="panel-corner tr"></div>
+    <div class="panel-corner bl"></div>
+    <div class="panel-corner br"></div>
+
+    <div class="glitch-icon">⚠</div>
+    <div class="game-logo">SIGNAL LOST</div>
+    <div class="logo-sub">◆ ECHOES OF OBLIVION ◆</div>
+
+    <div class="pixel-divider"></div>
+
+    <p class="error-message">
+      A rift in the realm interrupted your quest.<br>
+      We're already working to seal it — please try again shortly.
+    </p>
+
+    <button class="btn" onclick="location.href='/'">▶ RETURN TO SAFETY</button>
+
+    <p class="footer-note">★ NEED HELP? CONTACT THE GUILD ★</p>
+  </div>
+
+  <script>
+    window.addEventListener('load', function () {
+      var l = document.getElementById('pixelLoader');
+      if (!l) return;
+      setTimeout(function () {
+        l.classList.add('hide');
+        setTimeout(function () { l.remove(); }, 600);
+      }, 350);
+    });
+  </script>
+
+</body>
+</html>

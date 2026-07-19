@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%=pageTitle%></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; image-rendering: pixelated; }
+
+    :root {
+      --gold:    #FFD54F;
+      --pink:    #FF6EB4;
+      --cyan:    #00E5FF;
+      --teal:    #1DE9B6;
+      --purple:  #B39DDB;
+      --violet:  #7C4DFF;
+      --dark:    #060010;
+      --panel:   rgba(8, 0, 25, 0.96);
+    }
+
+    html, body { min-height: 100%; }
+
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ══ Sky ══ */
+    .sky {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(180deg, #030018 0%, #0a0035 45%, #1a0050 75%, #2d0060 100%);
+      overflow: hidden;
+    }
+    .sky::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 7%  9%,  #fff 100%, transparent),
+        radial-gradient(1px 1px at 14% 25%, #fff 100%, transparent),
+        radial-gradient(2px 2px at 20% 60%, rgba(0,229,255,0.8) 100%, transparent),
+        radial-gradient(1px 1px at 30% 15%, rgba(255,255,255,0.7) 100%, transparent),
+        radial-gradient(1px 1px at 42% 78%, #fff 100%, transparent),
+        radial-gradient(2px 2px at 50% 10%, rgba(255,110,180,0.9) 100%, transparent),
+        radial-gradient(1px 1px at 60% 48%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 68% 30%, rgba(255,255,255,0.6) 100%, transparent),
+        radial-gradient(2px 2px at 76% 18%, rgba(255,213,79,0.8) 100%, transparent),
+        radial-gradient(1px 1px at 84% 65%, #fff 100%, transparent),
+        radial-gradient(1px 1px at 92% 38%, rgba(255,255,255,0.7) 100%, transparent),
+        radial-gradient(1px 1px at 97% 82%, rgba(255,110,180,0.5) 100%, transparent);
+    }
+    /* Shooting star */
+    .sky::after {
+      content: '';
+      position: absolute; top: 12%; left: -5%;
+      width: 3px; height: 3px; background: #fff;
+      box-shadow: 8px 2px 0 rgba(255,255,255,0.5), 16px 4px 0 rgba(255,255,255,0.25);
+      animation: shoot 8s linear 3s infinite;
+    }
+    @keyframes shoot {
+      0%   { transform: translate(0,0);         opacity: 0; }
+      5%   { opacity: 1; }
+      30%  { transform: translate(120vw, 40vh); opacity: 0; }
+      100% { transform: translate(120vw, 40vh); opacity: 0; }
+    }
+
+    /* ══ Moon ══ */
+    .moon {
+      position: fixed; top: 28px; right: 80px; z-index: 1;
+      width: 4px; height: 4px; background: var(--gold);
+      box-shadow:
+        4px 0 0 var(--gold), 8px 0 0 var(--gold), 12px 0 0 var(--gold), 16px 0 0 var(--gold),
+        0 4px 0 var(--gold), 4px 4px 0 #fff8dc, 8px 4px 0 #fff8dc, 12px 4px 0 #fff8dc, 16px 4px 0 var(--gold), 20px 4px 0 var(--gold),
+        0 8px 0 var(--gold), 4px 8px 0 #fff8dc, 8px 8px 0 #fffde7, 12px 8px 0 #fff8dc, 16px 8px 0 #fff8dc, 20px 8px 0 var(--gold), 24px 8px 0 var(--gold),
+        -4px 12px 0 var(--gold), 0 12px 0 var(--gold), 4px 12px 0 var(--gold), 8px 12px 0 #fff8dc, 12px 12px 0 #fff8dc, 16px 12px 0 var(--gold), 20px 12px 0 var(--gold), 24px 12px 0 var(--gold),
+        -4px 16px 0 var(--gold), 0 16px 0 var(--gold), 4px 16px 0 #fff8dc, 8px 16px 0 #fff8dc, 12px 16px 0 var(--gold), 16px 16px 0 var(--gold), 20px 16px 0 var(--gold),
+        0 20px 0 var(--gold), 4px 20px 0 var(--gold), 8px 20px 0 var(--gold), 12px 20px 0 var(--gold), 16px 20px 0 var(--gold),
+        4px 24px 0 rgba(255,213,79,0.4), 8px 24px 0 rgba(255,213,79,0.4);
+      animation: moonPulse 4s ease-in-out infinite;
+    }
+    @keyframes moonPulse {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(255,213,79,0.4)); }
+      50%       { filter: drop-shadow(0 0 18px rgba(255,213,79,0.9)); }
+    }
+
+    /* ══ Floating petals ══ */
+    .petal {
+      position: fixed; z-index: 1;
+      width: 6px; height: 6px; background: #FF9EC0;
+      animation: drift linear infinite;
+    }
+    .petal:nth-child(1) { left: 6%;  top: -10px; animation-duration: 9s;  animation-delay: 0s;   }
+    .petal:nth-child(2) { left: 22%; top: -10px; animation-duration: 12s; animation-delay: 2s;   background: #FFB8D1; }
+    .petal:nth-child(3) { left: 40%; top: -10px; animation-duration: 8s;  animation-delay: 4s;   width: 4px; height: 4px; }
+    .petal:nth-child(4) { left: 60%; top: -10px; animation-duration: 11s; animation-delay: 1s;   background: #FFD0E8; width: 4px; height: 4px; }
+    .petal:nth-child(5) { left: 78%; top: -10px; animation-duration: 10s; animation-delay: 3s;   }
+    .petal:nth-child(6) { left: 90%; top: -10px; animation-duration: 7s;  animation-delay: 5s;   background: #FFB8D1; width: 4px; height: 4px; }
+    @keyframes drift {
+      0%   { transform: translateY(0) rotate(0deg);    opacity: 0; }
+      10%  { opacity: 0.8; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ══ Mountains ══ */
+    .mountains {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      z-index: 1; height: 120px;
+    }
+
+    /* ══ Layout ══ */
+    .page-shell { position: relative; z-index: 2; width: 100%; display: flex; justify-content: center; }
+
+    /* ══ Outer frame ══ */
+    .outer-frame {
+      width: 100%; max-width: 680px;
+      position: relative;
+      animation: slideUp 0.6s cubic-bezier(0.23,1,0.32,1) both;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* Title ribbon */
+    .ribbon {
+      position: absolute;
+      top: -18px; left: 50%; transform: translateX(-50%);
+      background: var(--violet);
+      color: #fff;
+      font-size: 5px;
+      padding: 5px 20px;
+      letter-spacing: 3px;
+      z-index: 3;
+      white-space: nowrap;
+      box-shadow: 4px 4px 0 #3a1090;
+    }
+    .ribbon::before, .ribbon::after {
+      content: '◆';
+      color: var(--gold);
+      margin: 0 6px;
+    }
+
+    /* ══ Panel ══ */
+    .glow-panel {
+      background: var(--panel);
+      border: 4px solid var(--violet);
+      box-shadow:
+        0 0 0 2px #0a0030,
+        0 0 0 6px #4a1090,
+        0 0 0 10px #0a0030,
+        inset 0 0 50px rgba(124,77,255,0.05);
+      padding: 40px 36px 32px;
+      position: relative;
+      animation: framePulse 5s ease-in-out infinite;
+    }
+    @keyframes framePulse {
+      0%, 100% { box-shadow: 0 0 0 2px #0a0030, 0 0 0 6px #4a1090, 0 0 0 10px #0a0030, inset 0 0 50px rgba(124,77,255,0.05); }
+      50%       { box-shadow: 0 0 0 2px #0a0030, 0 0 0 6px var(--cyan), 0 0 0 10px #0a0030, 0 0 60px rgba(0,229,255,0.12), inset 0 0 50px rgba(0,229,255,0.06); }
+    }
+
+    /* Corner SVGs */
+    .corner { position: absolute; width: 24px; height: 24px; }
+    .corner.tl { top: -4px;    left: -4px; }
+    .corner.tr { top: -4px;    right: -4px; transform: scaleX(-1); }
+    .corner.bl { bottom: -4px; left: -4px;  transform: scaleY(-1); }
+    .corner.br { bottom: -4px; right: -4px; transform: scale(-1,-1); }
+
+    /* ══ HUD top bar ══ */
+    .hud-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 12px;
+    }
+    .hud-title {
+      font-size: 6px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(0,229,255,0.6);
+    }
+    .hud-badge {
+      background: rgba(29,233,182,0.12);
+      border: 2px solid var(--teal);
+      color: var(--teal);
+      font-size: 5px;
+      padding: 4px 10px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    /* ══ Hero card layout ══ */
+    .hero-card {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* ═ Avatar column ═ */
+    .avatar-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+    /* Pixel avatar frame */
+    .avatar-frame {
+      position: relative;
+      width: 160px; height: 160px;
+    }
+    .avatar-frame::before {
+      content: '';
+      position: absolute; inset: -6px;
+      border: 4px solid var(--pink);
+      box-shadow: 0 0 0 4px #0a0030, 0 0 0 8px #7C4DFF, 0 0 24px rgba(255,110,180,0.3);
+      animation: avatarGlow 3s ease-in-out infinite;
+      z-index: 1;
+    }
+    @keyframes avatarGlow {
+      0%, 100% { box-shadow: 0 0 0 4px #0a0030, 0 0 0 8px #7C4DFF, 0 0 20px rgba(255,110,180,0.25); }
+      50%       { box-shadow: 0 0 0 4px #0a0030, 0 0 0 8px var(--pink), 0 0 40px rgba(255,110,180,0.55); }
+    }
+    /* Corner pips on avatar */
+    .avatar-frame::after {
+      content: '';
+      position: absolute; inset: -6px;
+      background:
+        linear-gradient(var(--cyan), var(--cyan)) top    left  / 10px 10px no-repeat,
+        linear-gradient(var(--cyan), var(--cyan)) top    right / 10px 10px no-repeat,
+        linear-gradient(var(--cyan), var(--cyan)) bottom left  / 10px 10px no-repeat,
+        linear-gradient(var(--cyan), var(--cyan)) bottom right / 10px 10px no-repeat;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .avatar-img {
+      width: 160px; height: 160px;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.2) contrast(1.05);
+    }
+    /* Scanline overlay */
+    .scanlines {
+      position: absolute; inset: 0; z-index: 3; pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+      );
+    }
+
+    /* Rank badge under avatar */
+    .rank-badge {
+      background: linear-gradient(135deg, #3a0080, #7C4DFF);
+      border: 3px solid var(--gold);
+      color: var(--gold);
+      font-size: 5px;
+      padding: 7px 14px;
+      letter-spacing: 2px;
+      text-align: center;
+      box-shadow: 3px 3px 0 #2a0060, 0 0 16px rgba(255,213,79,0.2);
+      width: 100%;
+    }
+    .rank-stars { font-size: 7px; display: block; margin-top: 4px; color: var(--gold); }
+
+    /* HP / MP bars */
+    .vitals { width: 100%; }
+    .vital-row { margin-bottom: 8px; }
+    .vital-label {
+      font-size: 5px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .vital-label .vl-name { color: var(--cyan); }
+    .vital-label .vl-val  { color: var(--gold); }
+    .vital-track {
+      width: 100%; height: 8px;
+      background: #1a0a2e;
+      border: 2px solid #3a1060;
+    }
+    .vital-fill {
+      height: 100%; width: 0%;
+      animation: vitalLoad 1.4s ease-out 0.6s forwards;
+    }
+    .vital-fill.hp { background: repeating-linear-gradient(90deg, #FF6EB4 0px, #FF6EB4 4px, #FF85C0 4px, #FF85C0 8px); --w: 82%; }
+    .vital-fill.mp { background: repeating-linear-gradient(90deg, #00E5FF 0px, #00E5FF 4px, #4FC3F7 4px, #4FC3F7 8px); --w: 65%; }
+    .vital-fill.xp { background: repeating-linear-gradient(90deg, #FFD54F 0px, #FFD54F 4px, #FFE082 4px, #FFE082 8px); --w: 48%; }
+    @keyframes vitalLoad { to { width: var(--w); } }
+
+    /* ═ Info column ═ */
+    .info-col { display: flex; flex-direction: column; gap: 0; }
+
+    /* Japanese subtitle */
+    .jp-sub {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 9px; font-weight: 300;
+      color: rgba(255,213,79,0.4);
+      letter-spacing: 5px;
+      margin-bottom: 4px;
+    }
+
+    /* Hero name */
+    .name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      color: var(--gold);
+      line-height: 1.5;
+      letter-spacing: 1px;
+      text-shadow: 3px 3px 0 #7A5500, 0 0 24px rgba(255,213,79,0.5);
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    /* Divider */
+    .info-divider {
+      width: 100%; height: 3px;
+      margin: 12px 0;
+      background: repeating-linear-gradient(90deg,
+        var(--violet) 0px, var(--violet) 4px,
+        transparent 4px, transparent 8px,
+        var(--pink) 8px, var(--pink) 12px,
+        transparent 12px, transparent 16px
+      );
+    }
+
+    /* Info rows */
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .info-icon {
+      font-size: 10px;
+      width: 24px; flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .info-block { flex: 1; }
+    .info-key {
+      font-size: 5px;
+      color: var(--cyan);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 5px;
+      text-shadow: 0 0 6px rgba(0,229,255,0.4);
+    }
+    .info-val {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 13px;
+      color: #e8e0ff;
+      letter-spacing: 0.5px;
+      word-break: break-all;
+    }
+
+    /* Guild tag */
+    .guild-tag {
+      display: inline-block;
+      background: rgba(0,229,255,0.08);
+      border: 2px solid var(--cyan);
+      color: var(--cyan);
+      font-size: 5px;
+      padding: 5px 10px;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* Abilities grid */
+    .abilities-label {
+      font-size: 5px;
+      color: var(--teal);
+      letter-spacing: 2px;
+      display: block;
+      margin-bottom: 8px;
+      text-shadow: 0 0 6px rgba(29,233,182,0.4);
+    }
+    .abilities {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .ability-chip {
+      background: rgba(124,77,255,0.12);
+      border: 2px solid #4a2080;
+      text-align: center;
+      padding: 8px 4px;
+      font-size: 4px;
+      color: var(--purple);
+      letter-spacing: 0.5px;
+      line-height: 1.8;
+      cursor: default;
+      transition: border-color 0.15s;
+    }
+    .ability-chip:hover { border-color: var(--pink); color: var(--pink); }
+    .ability-chip .abil-icon { font-size: 12px; display: block; margin-bottom: 3px; }
+
+    /* Action buttons */
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 5px;
+      padding: 10px 14px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 1px;
+      line-height: 1.7;
+      transition: transform 0.1s, filter 0.1s;
+    }
+    .btn:active { transform: translate(2px, 2px); }
+    .btn-edit {
+      background: var(--teal);
+      color: #001a12;
+      box-shadow: 3px 3px 0 #007050;
+      flex: 1;
+    }
+    .btn-edit:hover { filter: brightness(1.15); box-shadow: 3px 3px 0 #007050, 0 0 16px rgba(29,233,182,0.4); }
+    .btn-logout {
+      background: transparent;
+      color: var(--pink);
+      border: 3px solid var(--pink);
+      box-shadow: 3px 3px 0 #7a0040;
+    }
+    .btn-logout:hover { background: rgba(255,110,180,0.08); filter: brightness(1.2); }
+
+    /* ══ Bottom status bar ══ */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 3px solid rgba(124,77,255,0.25);
+    }
+    .status-item {
+      text-align: center;
+    }
+    .status-val {
+      font-size: 7px;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .status-key {
+      font-size: 4px;
+      color: rgba(179,157,219,0.5);
+      letter-spacing: 1px;
+    }
+    .status-divider {
+      width: 2px; height: 28px;
+      background: repeating-linear-gradient(
+        180deg, var(--violet) 0px, var(--violet) 3px, transparent 3px, transparent 6px
+      );
+    }
+    .blink { animation: blink 1.2s steps(1) infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ══ Responsive ══ */
+    @media (max-width: 560px) {
+      .hero-card { grid-template-columns: 1fr; }
+      .avatar-col { width: 100%; }
+      .avatar-frame, .avatar-img { width: 140px; height: 140px; }
+      .name { font-size: 10px; }
+      .abilities { grid-template-columns: repeat(2, 1fr); }
+      .status-bar { flex-wrap: wrap; gap: 12px; justify-content: center; }
+      .status-divider { display: none; }
+    }
+
+    /* ── Pixel loading screen ── */
+    .pixel-loader {
+      position: fixed; inset: 0; z-index: 99999;
+      background: var(--dark);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    .pixel-loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+    .pl-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .pl-sprite { display: flex; gap: 6px; }
+    .pl-sprite span { width: 10px; height: 10px; animation: plBounce 0.9s ease-in-out infinite; }
+    .pl-sprite span:nth-child(1) { background: var(--pink); box-shadow: 0 0 8px var(--pink); animation-delay: 0s; }
+    .pl-sprite span:nth-child(2) { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation-delay: 0.12s; }
+    .pl-sprite span:nth-child(3) { background: var(--gold); box-shadow: 0 0 8px var(--gold); animation-delay: 0.24s; }
+    .pl-sprite span:nth-child(4) { background: var(--teal); box-shadow: 0 0 8px var(--teal); animation-delay: 0.36s; }
+    @keyframes plBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.6; } 30% { transform: translateY(-14px); opacity: 1; } }
+    .pl-bar { width: 160px; height: 8px; background: #1a0a2e; border: 2px solid var(--violet); overflow: hidden; }
+    .pl-bar-fill { height: 100%; width: 0%; background: repeating-linear-gradient(90deg, var(--pink) 0px, var(--pink) 4px, var(--gold) 4px, var(--gold) 8px); animation: plFill 1.3s ease-in-out infinite; }
+    @keyframes plFill { 0% { width: 0%; } 50% { width: 100%; } 100% { width: 0%; } }
+    .pl-text { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--gold); letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,213,79,0.6); }
+    .pl-dots { animation: plBlink 1s steps(1) infinite; }
+    @keyframes plBlink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+
+  <!-- Pixel loading screen -->
+  <div class="pixel-loader" id="pixelLoader">
+    <div class="pl-inner">
+      <div class="pl-sprite"><span></span><span></span><span></span><span></span></div>
+      <div class="pl-bar"><div class="pl-bar-fill"></div></div>
+      <div class="pl-text">LOADING DOSSIER<span class="pl-dots">...</span></div>
+    </div>
+  </div>
+
+  <div class="sky"></div>
+
+  <!-- Petals -->
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+
+  <div class="moon"></div>
+
+  <!-- Mountains silhouette -->
+  <svg class="mountains" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="0,120 0,60 80,30 160,60 240,20 320,50 400,10 480,45 560,5 640,40 720,15 800,50 880,25 960,55 1040,20 1120,45 1200,30 1200,120" fill="#0a0030" opacity="0.8"/>
+    <polygon points="0,120 0,80 100,55 200,75 300,45 400,70 500,35 600,65 700,40 800,70 900,50 1000,72 1100,48 1200,65 1200,120" fill="#0d0040" opacity="0.9"/>
+  </svg>
+
+  <div class="page-shell">
+    <div class="outer-frame">
+
+      <!-- Ribbon -->
+      <div class="ribbon">HERO STATUS SCREEN</div>
+
+      <div class="glow-panel">
+
+        <!-- Corners -->
+        <svg class="corner tl" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="10" height="4" fill="#00E5FF"/>
+          <rect x="0" y="4" width="4" height="10" fill="#00E5FF"/>
+          <rect x="4" y="4" width="6" height="6" fill="#7C4DFF"/>
+          <rect x="10" y="0" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0" y="14" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+        <svg class="corner tr" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="10" height="4" fill="#00E5FF"/>
+          <rect x="0" y="4" width="4" height="10" fill="#00E5FF"/>
+          <rect x="4" y="4" width="6" height="6" fill="#7C4DFF"/>
+          <rect x="10" y="0" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0" y="14" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+        <svg class="corner bl" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="10" height="4" fill="#00E5FF"/>
+          <rect x="0" y="4" width="4" height="10" fill="#00E5FF"/>
+          <rect x="4" y="4" width="6" height="6" fill="#7C4DFF"/>
+          <rect x="10" y="0" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0" y="14" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+        <svg class="corner br" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="10" height="4" fill="#00E5FF"/>
+          <rect x="0" y="4" width="4" height="10" fill="#00E5FF"/>
+          <rect x="4" y="4" width="6" height="6" fill="#7C4DFF"/>
+          <rect x="10" y="0" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+          <rect x="0" y="14" width="4" height="4" fill="#7C4DFF" opacity="0.5"/>
+        </svg>
+
+        <!-- HUD bar -->
+        <div class="hud-bar">
+          <span class="hud-title">▶ PLAYER PROFILE</span>
+          <span class="hud-badge">◈ ONLINE <span class="blink">█</span></span>
+        </div>
+
+        <!-- Main hero card -->
+        <div class="hero-card">
+
+          <!-- Avatar column -->
+          <div class="avatar-col">
+            <div class="avatar-frame">
+              <img class="avatar-img" src="<%=personimage%>" alt="Profile Image">
+              <div class="scanlines"></div>
+            </div>
+
+            <div class="rank-badge">
+              ◆ RANK: ADEPT ◆
+              <span class="rank-stars">★ ★ ★ ☆ ☆</span>
+            </div>
+
+            <!-- Vitals -->
+            <div class="vitals">
+              <div class="vital-row">
+                <div class="vital-label">
+                  <span class="vl-name">HP</span>
+                  <span class="vl-val">82 / 100</span>
+                </div>
+                <div class="vital-track"><div class="vital-fill hp"></div></div>
+              </div>
+              <div class="vital-row">
+                <div class="vital-label">
+                  <span class="vl-name">MP</span>
+                  <span class="vl-val">65 / 100</span>
+                </div>
+                <div class="vital-track"><div class="vital-fill mp"></div></div>
+              </div>
+              <div class="vital-row">
+                <div class="vital-label">
+                  <span class="vl-name">XP</span>
+                  <span class="vl-val">4800 / 10000</span>
+                </div>
+                <div class="vital-track"><div class="vital-fill xp"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info column -->
+          <div class="info-col">
+
+            <span class="jp-sub">英雄の記録</span>
+
+            <div class="info">
+              <!-- Hero name -->
+              <div class="name"><%=personname%></div>
+
+              <div class="info-divider"></div>
+
+              <!-- Email -->
+              <div class="info-row">
+                <span class="info-icon">✉</span>
+                <div class="info-block">
+                  <span class="info-key">▸ REGISTERED EMAIL</span>
+                  <span class="info-val email"><%=personemail%></span>
+                </div>
+              </div>
+
+              <!-- Guild -->
+              <div class="info-row">
+                <span class="info-icon">⚔</span>
+                <div class="info-block">
+                  <span class="info-key">▸ GUILD</span>
+                  <span class="guild-tag">◆ ACADEMY OF THE FORGOTTEN ◆</span>
+                </div>
+              </div>
+
+              <!-- Abilities -->
+              <span class="abilities-label">▸ ABILITIES UNLOCKED</span>
+              <div class="abilities">
+                <div class="ability-chip"><span class="abil-icon">🔥</span>FLAME<br>STRIKE</div>
+                <div class="ability-chip"><span class="abil-icon">❄</span>ICE<br>VEIL</div>
+                <div class="ability-chip"><span class="abil-icon">⚡</span>THUNDER<br>STEP</div>
+                <div class="ability-chip"><span class="abil-icon">🌀</span>VOID<br>GATE</div>
+              </div>
+
+              <!-- Actions -->
+              <div class="action-row">
+                <button class="btn btn-edit" onclick="location.href='/editProfile'">▶ EDIT HERO</button>
+                <button class="btn btn-logout" onclick="location.href='/user'">⏏ LOGOUT</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Status bar -->
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="status-val"><%=persongames%></span>
+            <span class="status-key">GAMES PLAYED</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-val">LV.12</span>
+            <span class="status-key">LEVEL</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-val">247</span>
+            <span class="status-key">QUESTS DONE</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-val">8,420</span>
+            <span class="status-key">GOLD EARNED</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-val">14</span>
+            <span class="status-key">ALLIES</span>
+          </div>
+          <div class="status-divider"></div>
+          <div class="status-item">
+            <span class="status-val" style="color:var(--teal);">ACTIVE</span>
+            <span class="status-key">STATUS</span>
+          </div>
+        </div>
+
+      </div><!-- /.glow-panel -->
+    </div><!-- /.outer-frame -->
+  </div><!-- /.page-shell -->
+
+  <script>
+    window.addEventListener('load', function () {
+      var l = document.getElementById('pixelLoader');
+      if (!l) return;
+      setTimeout(function () {
+        l.classList.add('hide');
+        setTimeout(function () { l.remove(); }, 600);
+      }, 350);
+    });
+  </script>
+
+</body>
+</html>

