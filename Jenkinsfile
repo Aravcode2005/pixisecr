@@ -15,17 +15,17 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                echo 'Checking out source code...'
-                checkout scm
-            }
-        }
-
         stage('Verify Environment') {
             steps {
                 sh '''
                     set -e
+
+                    unset DOCKER_TLS_VERIFY
+                    unset DOCKER_CERT_PATH
+
+                    echo "DOCKER_HOST=${DOCKER_HOST}"
+                    echo "DOCKER_TLS_VERIFY=${DOCKER_TLS_VERIFY:-not-set}"
+                    echo "DOCKER_CERT_PATH=${DOCKER_CERT_PATH:-not-set}"
 
                     node --version
                     npm --version
@@ -57,6 +57,9 @@ pipeline {
             steps {
                 sh '''
                     set -e
+
+                    unset DOCKER_TLS_VERIFY
+                    unset DOCKER_CERT_PATH
 
                     docker build \
                         -f "${DOCKERFILE}" \
@@ -118,6 +121,9 @@ pipeline {
                 sh '''
                     set -e
 
+                    unset DOCKER_TLS_VERIFY
+                    unset DOCKER_CERT_PATH
+
                     docker image inspect "${APP_NAME}:${IMAGE_TAG}"
                 '''
             }
@@ -131,6 +137,9 @@ pipeline {
                 ]]) {
                     sh '''
                         set -e
+
+                        unset DOCKER_TLS_VERIFY
+                        unset DOCKER_CERT_PATH
 
                         if command -v aws >/dev/null 2>&1; then
                             AWS_COMMAND="aws"
@@ -164,11 +173,11 @@ pipeline {
                             "${APP_NAME}:${IMAGE_TAG}" \
                             "${LATEST_IMAGE}"
 
-                        echo "Pushing build image..."
+                        echo "Pushing ${BUILD_IMAGE}..."
 
                         docker push "${BUILD_IMAGE}"
 
-                        echo "Pushing latest image..."
+                        echo "Pushing ${LATEST_IMAGE}..."
 
                         docker push "${LATEST_IMAGE}"
                     '''
