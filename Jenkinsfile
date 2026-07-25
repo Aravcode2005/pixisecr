@@ -7,8 +7,6 @@ pipeline {
         IMAGE_TAG = "${BUILD_NUMBER}"
 
         DOCKER_HOST = 'tcp://elated_robinson:2375'
-        DOCKER_TLS_VERIFY = ''
-        DOCKER_CERT_PATH = ''
 
         AWS_REGION = 'ap-south-1'
         AWS_ACCOUNT_ID = '209197638193'
