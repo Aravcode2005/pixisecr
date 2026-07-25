@@ -48,7 +48,7 @@ pipeline {
             steps {
                 sh '''
                     set -e
-                    npx jest--passWithNoTests
+                    npx jest --passWithNoTests
                 '''
             }
         }
