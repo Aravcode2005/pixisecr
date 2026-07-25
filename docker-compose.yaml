@@ -1,45 +1,27 @@
-version: "3.9"
 
 services:
   app:
     build: .
-    container_name: pixelmania-app
+    container_name: pixelmaniav1
     ports:
-      - "80:3000"
+      - "80:8081"
     env_file:
       - .env
     environment:
       NODE_ENV: production
-      PORT: 3000
-      MONGODB_URI: mongodb://admin:qwerty@mongo:27017/pixelmania?authSource=admin
+      PORT: 8081
       REDIS_URL: redis://redis:6379
     depends_on:
-      - mongo
       - redis
     restart: unless-stopped
-
-  mongo:
-    image: mongo:7
-    container_name: pixelmania-mongo
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: qwerty
-    volumes:
-      - mongo-data:/data/db
-    restart: unless-stopped
-
   redis:
     image: redis:7-alpine
-    container_name: pixelmania-redis
+    container_name: pixelmaniav1-redis
     ports:
       - "6379:6379"
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis-data:/data
     restart: unless-stopped
-
 volumes:
-  mongo-data:
   redis-data:

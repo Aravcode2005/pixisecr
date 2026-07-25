@@ -8,8 +8,13 @@ RUN npm ci --omit=dev
 
 COPY . .
 
+COPY entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
+
+
 ENV NODE_ENV=production
 
-EXPOSE 3000
+EXPOSE 8081
 
-CMD ["npm", "start"]
+ENTRYPOINT ["./entrypoint.sh"]
