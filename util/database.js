@@ -10,7 +10,7 @@ const dotenv = require('dotenv');
     retryWrites: true
 };
 
-const ConnectDB = mongoose.connect(process.env.MONGO_DB_URI, mongoOptions)
+const ConnectDB = mongoose.connect(process.env.MONGODB_URI, mongoOptions)
      .then(() => console.log("Connected to the database"))
      .catch(err => {
         console.error('Database connection failed:', err);
