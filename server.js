@@ -673,17 +673,12 @@ function tick() {
 }
 
 setInterval(() => { tick() }, 33);
-const PORT = process.env.PORT;
-try {
-    server.listen(PORT, () => {
-        console.log(`Application running on ${PORT} at http://localhost:${PORT}`);
-    })
-}
-catch (error) {
-    console.log(`There was this error ${error} starting the server`);
-}
+const PORT = process.env.PORT||8081;
 ConnectDB.then(() => {
     console.log("Connected to the db!");
+    server.listen(PORT,()=>{
+        console.log(`Pixelmania live at ${PORT}`);
+    })
 }).catch((error) => {
-    console.log("there was an error" + error);
+    console.error(error);
 })

@@ -62,9 +62,8 @@ exports.postAdminotp = async (req, res, next) => {
     const email = req.body.email;
     console.log(`The enetered name ${name} and ${pswd}`);
     if (name === process.env.ADMIN_NAME && pswd === process.env.ADMIN_PASSWORD) {
-        const otp = Math.floor(Math.random() * 1000000 + Math.random() * 100000);
+        const otp = Math.floor(900000 + Math.random() * 100000);
         req.session.token = crypto.randomUUID();
-
         try {
             await redis.hset(req.session.token, {
                 name: name,
@@ -74,7 +73,6 @@ exports.postAdminotp = async (req, res, next) => {
                 verified: false,
                 timeStamp: Date.now()
             })
-
             await redis.expire(req.session.token, 300);
 
         } catch (error) {
@@ -83,9 +81,9 @@ exports.postAdminotp = async (req, res, next) => {
         try {
             await transporter.sendMail({
                 to: email,
-                from: 'aravlead@gmail.com',
-                subject: `OTP SENT`,
-                html: `<h1>${otp}!</h1>`
+                from:'aravlead@gmail.com',
+                subject: `OTP for Admin Verification`,
+                html:`<p>This is the one time password for the requested verification attempt <h1>${otp}!</h1></p>`
             })
         } catch (error) {
             console.log(error);
@@ -111,7 +109,6 @@ exports.postverifyotp = async (req, res, next) => {
     const savedOtp = await redis.hget(req.session.token, "savedOtp");
     console.log(String(savedOtp));
     console.log(String(otp));
-
     if (String(otp) === String(savedOtp)) {
         const sensei = await redis.hget(req.session.token, "name");
         const tkn = req.session.token;
@@ -151,37 +148,31 @@ exports.postverifyotp = async (req, res, next) => {
         }
         if (attempts <= 0) {
             await redis.del(req.session.token);
-            return res.status(403).json({
-                message: 'Forbidden'
-            })
+            return res.redirect('/admin/verify/otp');
         }
     }
 }
-
 exports.verifyAdminJwt = (req, res, next) => {
     const token = req.cookies.admin_jwt;
     if (!token) {
-        return res.status(403).json({
-            message: 'Forbidden'
-        })
+        return res.redirect('/admin/verify/otp');
     }
     else {
         try {
             const decoded = jwt.verify(token, process.env.JWT_ADMIN_SECRET);
             if (decoded.role === "admin") {
-                decoded.admin = req.session.adminName;
+                 req.session.adminName=decoded.adminName;
+                 req.session.role=decoded.role
+                 req.session.isLoggedIn=true
                 next();
             }
             else {
-                return res.status(403).json({
-                    message: 'Forbidden'
-                })
+                return res.redirect('/admin/verify/otp');
             }
         }
         catch (error) {
-            return res.status(403).json({
-                message: 'Forbidden'
-            })
+            console.error(error);
+           return res.redirect('/admin/verify/otp');
         }
     }
 }
@@ -191,16 +182,13 @@ exports.isAdminAuth = (req, res, next) => {
         return next();
     }
     else {
-        return res.status(403).json({
-            message: 'Not Authenticated'
-        })
+      return res.redirect('/admin/verify/otp');
     }
 }
 exports.getadmindashboard = async (req, res, next) => {
     const data = await feedbackSchema.find();
     const prompt = `These are user feedbacks ${data} for my app, group them by type and give a detailed report`;
     const finalprocessedata = await aiFilteration(prompt);
-
     res.render('fb', {
         pageTitle: 'feedback',
         content: finalprocessedata,
