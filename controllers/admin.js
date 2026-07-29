@@ -81,9 +81,9 @@ exports.postAdminotp = async (req, res, next) => {
         try {
             await transporter.sendMail({
                 to: email,
-                from:'aravlead@gmail.com',
+                from: 'aravlead@gmail.com',
                 subject: `OTP for Admin Verification`,
-                html:`<p>This is the one time password for the requested verification attempt <h1>${otp}!</h1></p>`
+                html: `<p>This is the one time password for the requested verification attempt <h1>${otp}!</h1></p>`
             })
         } catch (error) {
             console.log(error);
@@ -129,7 +129,7 @@ exports.postverifyotp = async (req, res, next) => {
             const token = jwt.sign(payload, secretKey, { expiresIn });
             res.cookie('admin_jwt', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: false,
                 sameSite: 'strict',
                 maxAge: 3600000,
                 path: '/'
@@ -161,9 +161,9 @@ exports.verifyAdminJwt = (req, res, next) => {
         try {
             const decoded = jwt.verify(token, process.env.JWT_ADMIN_SECRET);
             if (decoded.role === "admin") {
-                 req.session.adminName=decoded.adminName;
-                 req.session.role=decoded.role
-                 req.session.isLoggedIn=true
+                req.session.adminName = decoded.adminName;
+                req.session.role = decoded.role
+                req.session.isLoggedIn = true
                 next();
             }
             else {
@@ -172,7 +172,7 @@ exports.verifyAdminJwt = (req, res, next) => {
         }
         catch (error) {
             console.error(error);
-           return res.redirect('/admin/verify/otp');
+            return res.redirect('/admin/verify/otp');
         }
     }
 }
@@ -182,7 +182,7 @@ exports.isAdminAuth = (req, res, next) => {
         return next();
     }
     else {
-      return res.redirect('/admin/verify/otp');
+        return res.redirect('/admin/verify/otp');
     }
 }
 exports.getadmindashboard = async (req, res, next) => {
