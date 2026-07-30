@@ -1,728 +1,267 @@
-# Echoes of Oblivion
+# PixelMania
 
-Echoes of Oblivion (also referred to as PixelMania in parts of the code) is a browser-based, real-time 3D multiplayer arena game. The application combines a Node.js/Express web server, EJS-rendered pages, Socket.IO multiplayer communication, MongoDB persistence, Redis-backed administrator OTP verification, and a Three.js game client.
+**A server-authoritative 3D multiplayer arena game built with Node.js, Socket.IO, Three.js, MongoDB, and Redis.**
 
-The game server is authoritative: browsers send movement intent, while the server owns player positions, collision detection, health, lives, room membership, and match results.
+[![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-4-010101?logo=socket.io&logoColor=white)](https://socket.io/)
+[![Three.js](https://img.shields.io/badge/Three.js-r128-000000?logo=three.js&logoColor=white)](https://threejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![AWS](https://img.shields.io/badge/AWS-EC2%20%7C%20ECR-FF9900?logo=amazonwebservices&logoColor=white)](https://aws.amazon.com/)
 
-> This document describes the current implementation. Some names in the UI, source code, package metadata, container names, and infrastructure still use the older PixelMania name.
+PixelMania, formerly **Echoes of Oblivion**, is a browser-based multiplayer game in which the server owns the authoritative world state. Players send movement and action intent through Socket.IO, while the server calculates physics, collisions, combat, match timing, and leaderboard results.
 
-## Table of contents
+> **Production snapshot:** The application returned HTTP 200 at `http://13.207.5.21` on July 26, 2026. Availability is not continuously guaranteed by this README.
 
-1. [Features](#features)
-2. [Technology stack](#technology-stack)
-3. [System architecture](#system-architecture)
-4. [Repository structure](#repository-structure)
-5. [Prerequisites](#prerequisites)
-6. [Environment configuration](#environment-configuration)
-7. [Local development](#local-development)
-8. [Running with Docker](#running-with-docker)
-9. [Application routes](#application-routes)
-10. [Authentication and authorization](#authentication-and-authorization)
-11. [Multiplayer game lifecycle](#multiplayer-game-lifecycle)
-12. [Socket.IO event reference](#socketio-event-reference)
-13. [Data models](#data-models)
-14. [File uploads and static assets](#file-uploads-and-static-assets)
-15. [Administrator feedback workflow](#administrator-feedback-workflow)
-16. [CI/CD pipeline](#cicd-pipeline)
-17. [Testing and verification](#testing-and-verification)
-18. [Troubleshooting](#troubleshooting)
-19. [Security and production readiness](#security-and-production-readiness)
-20. [Known limitations](#known-limitations)
+## Highlights
 
-## Features
+- Server-authoritative multiplayer engine running at approximately 30 Hz
+- Room-isolated world state with up to three players per match
+- Real-time movement, combat, chat, typing indicators, and leaderboard updates
+- Three.js jungle arena with procedural scenery, particles, lighting, fog, and CSS2D labels
+- Player and administrator authentication using sessions, JWT, bcrypt, and email OTP
+- MongoDB persistence and Redis-backed short-lived state
+- Docker Compose orchestration for the application and Redis
+- Jenkins pipeline that builds and publishes versioned images to Amazon ECR
+- Production deployment on Amazon EC2
 
-- Account registration with password hashing and avatar upload
-- Sign-in using a server session and a signed JWT cookie
-- Profile viewing and profile editing
-- Three-player multiplayer rooms
-- Server-controlled movement, gravity, collision, damage, health, and lives
-- Five-minute matches with a final leaderboard
-- Real-time room chat and typing indicators
-- Duplicate active-session detection by username
-- Landing-page feedback submission
-- Administrator login with email OTP verification
-- Redis-backed OTP expiry and retry tracking
-- AI-generated feedback classification for the administrator dashboard
-- Docker image and Docker Compose configuration
-- Jenkins pipeline that builds and pushes images to Amazon ECR
+## Architecture
 
-## Technology stack
+```mermaid
+flowchart TD
+    A["Browser: Three.js + EJS"] <-->|"HTTP + Socket.IO"| B["Node.js + Express"]
+    B --> C["Authoritative game loop"]
+    C --> D["Room world state"]
+    B --> E["MongoDB Atlas"]
+    B --> F["Redis"]
+    G["Jenkins"] --> H["Docker image"]
+    H --> I["Amazon ECR"]
+    I --> J["Amazon EC2"]
+```
 
-| Area | Technology |
-|---|---|
-| Runtime | Node.js 20 in the production container |
-| Web framework | Express 5 |
-| Server rendering | EJS |
-| Real-time transport | Socket.IO 4 |
-| Database | MongoDB with Mongoose |
-| Temporary data | Redis with `ioredis` |
-| Authentication | `express-session`, JWT, and `bcryptjs` |
-| Email | Nodemailer using SendGrid SMTP |
+| Layer | Technology | Responsibility |
+| --- | --- | --- |
+| Browser | Three.js r128, Socket.IO client, EJS | Rendering, input, HUD, chat, and leaderboard |
+| Application | Node.js, Express 5, Socket.IO 4 | HTTP routes, sessions, rooms, and game loop |
+| State | MongoDB Atlas, Redis 7 | Persistent users/feedback and short-lived OTP state |
+| Security | JWT, express-session, bcryptjs | Player and administrator authentication |
+| Delivery | Jenkins, Docker, Amazon ECR | Validation, image building, tagging, and publication |
+| Runtime | Amazon EC2, Docker Compose | Application and Redis containers |
+
+## Multiplayer Engine
+
+Each game room owns an independent `World[roomId]` state.
+
+1. The client captures keyboard input and sends directional intent.
+2. The server processes movement, gravity, and collisions on a roughly 33 ms tick.
+3. The authoritative position snapshot is broadcast through `update-movement`.
+4. Clients interpolate the received state to render smooth movement.
+
+The server also owns:
+
+- player health and lives
+- projected sphere-distance collision checks
+- five-minute match timing
+- room-scoped chat and typing events
+- heap-sorted match leaderboards
+- disconnect cleanup
+- duplicate-session prevention through `activeUsers`
+
+## Browser Rendering
+
+The client renders a jungle-themed arena using Three.js:
+
+- fog, multiple lights, floor grid, and a glowing arena boundary
+- low-poly player avatars assembled from primitives
+- deterministic player colors derived from player names
+- HTML name and health labels through `CSS2DObject`
+- interpolated chase camera
+- procedural vegetation and particle effects
+- movement-based limb animation
+
+The renderer uses a reduced pixel ratio of `0.55` to prioritize browser performance.
+
+## Authentication and Data
+
+### Players
+
+- Signup and signin
+- Password hashing with `bcryptjs`
+- Session regeneration
+- Player JWT cookie
+- Multer-based avatar uploads
+
+### Administrators
+
+- Separate administrator JWT
+- Email OTP stored in Redis
+- Five-minute OTP expiry
+- Three-attempt verification lockout
+
+### Additional services
+
+- Mongoose models for users and feedback
+- Nodemailer with SendGrid SMTP for welcome and OTP messages
+- OpenAI-assisted grouping and summarization of submitted feedback
+
+## Tech Stack
+
+| Category | Technologies |
+| --- | --- |
+| Backend | Node.js, Express 5 |
+| Real-time | Socket.IO 4 |
+| Rendering | Three.js r128, CSS2DRenderer |
+| Views | EJS |
+| Database | MongoDB Atlas, Mongoose |
+| Cache | Redis 7, ioredis |
+| Authentication | JWT, express-session, bcryptjs |
 | Uploads | Multer |
-| 3D client | Three.js and browser JavaScript |
-| AI integration | OpenAI Node SDK |
-| Containers | Docker and Docker Compose |
-| CI/CD | Jenkins and Amazon ECR |
+| Email | Nodemailer, SendGrid SMTP |
+| Infrastructure | Docker, Docker Compose, Jenkins, Amazon ECR, Amazon EC2 |
 
-The dependency list in `package.json` includes direct and transitive-style packages. The application-level packages named above are the important ones for understanding the system.
+## Getting Started
 
-## System architecture
+### Prerequisites
 
-```text
-Browser
-  |
-  | HTTP: pages, forms, cookies, images
-  | Socket.IO: input, chat, world updates
-  v
-Express + Socket.IO server (server.js)
-  |                  |                   |
-  | Mongoose         | ioredis          | SMTP / OpenAI API
-  v                  v                   v
-MongoDB            Redis             SendGrid / OpenAI
-```
-
-### Request flow
-
-1. Express renders EJS pages and processes form submissions.
-2. Player authentication stores identity in an Express session and a JWT cookie.
-3. The same session middleware is shared with Socket.IO.
-4. An authenticated game socket reads the username from the session.
-5. The server assigns the socket to an available room.
-6. The browser emits input events; it does not directly set authoritative coordinates.
-7. The server runs a physics tick approximately every 33 ms and broadcasts room state.
-
-### Runtime entry point
-
-`server.js` is the active entry point:
-
-```bash
-npm start
-```
-
-Although the `main` field in `package.json` currently names `alphaserver.js`, the start script and production container both execute `server.js`.
-
-## Repository structure
-
-```text
-.
-|-- controllers/
-|   |-- admin.js             # Admin OTP, JWT, feedback, and AI report logic
-|   |-- auth.js              # Signup, sign-in, player JWT, game/profile handlers
-|   `-- user.js              # Landing page, user page, logout, and feedback
-|-- models/
-|   |-- feedback.js          # Feedback Mongoose model
-|   `-- user.js              # User Mongoose model
-|-- routes/
-|   |-- admin.js
-|   |-- auth.js
-|   `-- user.js
-|-- util/
-|   `-- database.js          # MongoDB connection initialization
-|-- views/                   # EJS templates
-|-- public/
-|   |-- css/
-|   |-- players.js           # Active Three.js multiplayer client
-|   |-- three.js
-|   `-- *.glb                # 3D assets
-|-- images/                  # Uploaded user avatars (runtime data)
-|-- server.js                # Express, Socket.IO, rooms, and physics
-|-- Dockerfile               # Node.js production image
-|-- docker-compose.yaml      # Application and Redis services
-|-- entrypoint.sh            # Container entry point
-|-- Dockerfile.jent          # Custom Jenkins controller image
-|-- Jenkinsfile              # Build/test/image/ECR pipeline
-|-- package.json
-`-- README.md
-```
-
-`Sea.ejs`, `dil.ejs`, and several scripts under `public/` appear to be older experiments or alternate scenes. They are not part of the primary route-to-`mainScene.ejs` game flow.
-
-## Prerequisites
-
-For local development:
-
-- Node.js 20 or a compatible recent Node.js release
-- npm
-- A MongoDB deployment (local MongoDB or MongoDB Atlas)
+- Node.js 20+
+- MongoDB
 - Redis
-- SendGrid SMTP credentials if signup and administrator OTP email must work
-- An OpenAI API key if AI feedback classification must work
+- Docker and Docker Compose, if using containers
 
-For the containerized workflow:
-
-- Docker Engine
-- Docker Compose v2
-- An externally reachable MongoDB deployment; the current Compose file does not create MongoDB
-
-## Environment configuration
-
-Create a local `.env` file in the repository root. Do not commit it.
-
-```dotenv
-# Web server
-PORT=8081
-NODE_ENV=development
-
-# MongoDB
-MONGODB_URI=mongodb://127.0.0.1:27017/echoes_of_oblivion
-
-# Redis
-REDIS_URL=redis://127.0.0.1:6379
-
-# Sessions and JWTs
-SESSION_SECRET=replace-with-a-long-random-value
-JWT_SECRET=replace-with-a-different-long-random-value
-JWT_ADMIN_SECRET=replace-with-another-long-random-value
-JWT_EXPIRES_IN=1h
-
-# Administrator login
-ADMIN_NAME=admin
-ADMIN_PASSWORD=replace-with-a-strong-password
-
-# SendGrid SMTP
-SGKEY=your-sendgrid-api-key
-
-# OpenAI feedback classification
-OPEN_AI_API_KEY=your-openai-api-key
-```
-
-### Variable reference
-
-| Variable | Required | Used for |
-|---|---:|---|
-| `PORT` | No | HTTP server port; defaults to `8081` |
-| `NODE_ENV` | Recommended | Production cookie behavior and runtime mode |
-| `MONGODB_URI` | Yes | Mongoose connection string |
-| `REDIS_URL` | Yes for admin OTP | Redis connection; code defaults to `redis://redis:6379` |
-| `SESSION_SECRET` | Yes | Signing the Express session cookie |
-| `JWT_SECRET` | Yes | Signing and verifying player JWTs |
-| `JWT_ADMIN_SECRET` | Yes | Signing and verifying administrator JWTs |
-| `JWT_EXPIRES_IN` | Yes | JWT expiry passed to `jsonwebtoken` |
-| `ADMIN_NAME` | Yes for admin access | Administrator credential check |
-| `ADMIN_PASSWORD` | Yes for admin access | Administrator credential check |
-| `SGKEY` | Yes for email | SendGrid SMTP password/API key |
-| `OPEN_AI_API_KEY` | Yes for AI report | OpenAI client authentication |
-
-Use separate high-entropy values for all three secrets. The application does not validate missing variables at startup, so a server can begin listening even when a feature is misconfigured.
-
-## Local development
-
-### 1. Install dependencies
+### Clone the repository
 
 ```bash
-npm ci
+git clone https://github.com/Aravcode2005/pixisecr.git
+cd pixisecr
 ```
 
-Use `npm install` only when intentionally changing the dependency lock file.
+### Configure the environment
 
-### 2. Start MongoDB and Redis
+Create a `.env` file and provide the application secrets and service connections required by the source configuration, including:
 
-If they are installed locally, ensure both services are running and that `MONGODB_URI` and `REDIS_URL` point to them.
+- MongoDB connection URI
+- Redis URL
+- session and JWT secrets
+- SendGrid/SMTP configuration
+- OpenAI credentials, if AI feedback processing is enabled
 
-To start only Redis with Docker:
+Do not commit `.env` or production credentials.
 
-```bash
-docker run --name echoes-redis -p 6379:6379 redis:7-alpine
-```
-
-### 3. Configure `.env`
-
-Add the variables described in [Environment configuration](#environment-configuration).
-
-### 4. Start the application
-
-```bash
-npm start
-```
-
-The current start command uses Nodemon:
-
-```text
-nodemon server.js
-```
-
-Open `http://localhost:8081` unless `PORT` is set to another value.
-
-### 5. Exercise the main flow
-
-1. Open `/signup` and create a player with a PNG or JPEG avatar.
-2. Sign in at `/signin`.
-3. Open `/mainScene`.
-4. Use three different accounts/browser sessions to fill a room and start a match.
-5. Submit feedback from the landing page.
-6. Open `/admin/verify/otp` to test the administrator flow.
-
-## Running with Docker
-
-The production image uses Node.js 20 Alpine, installs locked production dependencies, copies the application, and launches `node server.js` through `entrypoint.sh`.
-
-### Build and start
+### Run with Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
-The Compose configuration exposes:
+The Compose configuration:
 
-| Service | Host port | Container port |
-|---|---:|---:|
-| Application | `80` | `8081` |
-| Redis | `6379` | `6379` |
+- maps host port `80` to application port `8081`
+- starts the application and Redis
+- persists Redis data in the `redis-data` volume
+- restarts services unless stopped
 
-After startup, open `http://localhost`.
+Open `http://localhost` after the containers become healthy.
 
-### Important Compose behavior
+### Run without Docker
 
-- The app reads environment values from `.env`.
-- Compose overrides `NODE_ENV=production` and `PORT=8081`.
-- Redis is reachable inside the Compose network as `redis://redis:6379`.
-- MongoDB is not defined in the Compose file. `MONGODB_URI` must point to MongoDB Atlas, a host MongoDB instance, or another accessible MongoDB service.
-- `depends_on` controls container start order, not Redis readiness.
-- Uploaded avatars are written inside the app container because `images/` has no volume mapping. They will be lost when the container is replaced unless persistent storage is added.
-
-### Stop services
+Start MongoDB and Redis, configure `.env`, then run:
 
 ```bash
-docker compose down
+npm ci
+node server.js
 ```
 
-To remove the Redis data volume as well:
+The application listens on port `8081` in the production container configuration.
 
-```bash
-docker compose down --volumes
+## Container Design
+
+The production image:
+
+- uses `node:20-alpine`
+- installs locked production dependencies using `npm ci --omit=dev`
+- exposes port `8081`
+- launches through `entrypoint.sh`
+
+The entrypoint uses `set -e` and:
+
+```sh
+exec node server.js
 ```
 
-The second command permanently removes locally persisted Redis data.
+Using `exec` makes Node.js PID 1, allowing it to receive container shutdown signals correctly.
 
-## Application routes
+## CI and Image Delivery
 
-### Public and player routes
+The Jenkins pipeline:
 
-| Method | Path | Protection | Purpose |
-|---|---|---|---|
-| `GET` | `/` | Public | Render the landing page |
-| `POST` | `/player/feedback` | Public | Store feedback by submitted name |
-| `GET` | `/signup` | Public | Render registration form |
-| `POST` | `/signup` | Public | Create player and upload avatar |
-| `GET` | `/signin` | Public | Render sign-in form |
-| `POST` | `/signin` | Public | Authenticate and create player session/JWT |
-| `GET` | `/user` | Session + player JWT | Render signed-in user page |
-| `POST` | `/user` | Session + player JWT | Log out player |
-| `GET` | `/profile` | Player JWT | Render profile from session data |
-| `GET` | `/editProfile` | Session + player JWT | Render profile editor |
-| `POST` | `/editProfile` | Session + player JWT | Update username and avatar |
-| `GET` | `/mainScene` | Session + player JWT | Render the multiplayer scene |
-| `GET` | `/error` | Public | Render generic error page |
+1. Checks Node.js, npm, Docker connectivity, and required environment values.
+2. Installs locked dependencies with `npm ci`.
+3. Runs `npx jest --passWithNoTests`.
+4. Builds an image tagged with the Jenkins build number and Git commit.
+5. Installs or reuses AWS CLI.
+6. Inspects the built image.
+7. Authenticates to Amazon ECR using Jenkins-managed credentials.
+8. Pushes immutable build-numbered and mutable `latest` tags to the `piximania` repository.
 
-### Administrator routes
+> The checked-in pipeline publishes images to ECR but does not contain an automated EC2 deployment stage. EC2 rollout is currently a separate deployment step.
 
-| Method | Path | Protection | Purpose |
-|---|---|---|---|
-| `GET` | `/admin/verify/otp` | Public | Render admin credential form |
-| `POST` | `/admin/verify/otp` | Public | Check credentials, create and email OTP |
-| `GET` | `/verifyotp` | OTP session token | Render OTP form |
-| `POST` | `/verifyotp` | OTP session token | Verify OTP and create admin session/JWT |
-| `GET` | `/admin/dashboard` | Admin session + admin JWT | Render feedback and AI report |
-| `POST` | `/admin/dashboard` | Public handler | Destroy admin session and clear cookie |
-
-## Authentication and authorization
-
-### Player authentication
-
-Signup performs the following operations:
-
-1. Reads `Name`, `email`, `Pswd`, and the uploaded `image`.
-2. Accepts PNG, JPG, or JPEG MIME types.
-3. Checks for an existing username and email.
-4. Hashes the password with `bcryptjs` using cost factor 12.
-5. Creates a MongoDB user document.
-6. Sends a welcome email through SendGrid SMTP.
-7. Redirects to `/signin`.
-
-Sign-in:
-
-1. Finds the account by email.
-2. Compares the submitted password with the stored bcrypt hash.
-3. Regenerates the session to reduce session-fixation risk.
-4. Stores player details in the session.
-5. Signs a player JWT containing the session ID, username, and `player` role.
-6. Sets `player_jwt` as an HTTP-only, same-site cookie.
-
-Protected player routes use `verifyJwt`, `isAuthenticated`, or both. The two checks are complementary:
-
-- `verifyJwt` verifies the signed cookie.
-- `isAuthenticated` checks that the server session is logged in with the `user` role.
-
-### Administrator authentication
-
-Administrator authentication is independent of player authentication:
-
-1. Submitted credentials are compared with `ADMIN_NAME` and `ADMIN_PASSWORD`.
-2. A numeric OTP and three allowed attempts are stored in Redis.
-3. The Redis key uses a random UUID and expires after 300 seconds.
-4. The OTP is emailed to the submitted address.
-5. A valid OTP regenerates the session and sets the `admin` role.
-6. A separate JWT is stored in the `admin_jwt` cookie.
-7. The Redis OTP record is deleted after successful verification.
-
-Player and administrator tokens use different cookie names and signing secrets.
-
-## Multiplayer game lifecycle
-
-### Connection and room assignment
-
-Socket.IO reuses the Express session middleware. A socket without `session.username` is disconnected.
-
-For an authenticated socket:
-
-1. The server rejects a second active connection using the same username.
-2. It finds the first room with fewer than three players.
-3. If no room is available, it creates a random room ID.
-4. It initializes the player's world state.
-5. The client emits `join-room`, and the socket joins its assigned Socket.IO room.
-6. When the room reaches three players, the server emits `start match`.
-
-### Initial player state
-
-```js
-{
-  playerName,
-  id,
-  health: 50,
-  relicscore: 0,
-  x,
-  y: 0,
-  z,
-  r: 1,
-  lives: 5,
-  moveUp: false,
-  moveDown: false,
-  moveRight: false,
-  moveLeft: false,
-  moveForward: false,
-  moveBackward: false
-}
-```
-
-Initial `x` and `z` coordinates are randomized.
-
-### Server tick
-
-The game tick runs every 33 ms, approximately 30 times per second.
-
-- Movement speed is based on `v = 15`.
-- Movement flags are set by Socket.IO input events.
-- Collision is tested against other players in the same room.
-- A collision damages the affected player.
-- When health reaches zero, a life is consumed and health is reset according to the remaining lives.
-- A player with no remaining lives is removed from the active world state.
-- Vertical position is updated by server-side gravity and constrained to the ground.
-- The server emits `update-movement` to the room with authoritative state.
-
-Because state is held in memory, rooms and active matches are lost whenever the Node.js process restarts.
-
-### Match completion
-
-When a room fills:
-
-- All players are reset to 50 health and 5 lives.
-- `start match` is broadcast.
-- A five-minute timeout begins.
-- At timeout, the server constructs rankings from username, health, and lives.
-- The ranked result is sent in `stop match`.
-
-### Disconnect cleanup
-
-On disconnect, the server removes the socket/player from:
-
-- The room membership object
-- The per-room world state
-- The player list
-- The active-username map
-
-It then emits `leave-room` to remaining room members.
-
-## Socket.IO event reference
-
-### Client to server
-
-| Event | Payload | Purpose |
-|---|---|---|
-| `join-room` | None | Join the room assigned during connection |
-| `chat message` | Message data | Send a chat message to other room members |
-| `start typing` | None | Notify room members that the player is typing |
-| `stop typing` | None | Clear the typing indicator |
-| `moveUp` | Optional/unused | Enable upward movement flag |
-| `moveDown` | Optional/unused | Enable downward movement flag |
-| `moveLeft` | Optional/unused | Enable left movement flag |
-| `moveRight` | Optional/unused | Enable right movement flag |
-| `moveForward` | Optional/unused | Enable forward movement flag |
-| `moveBackward` | Optional/unused | Enable backward movement flag |
-| `moveUpstop` | None | Disable upward movement flag |
-| `moveDownstop` | None | Disable downward movement flag |
-| `moveLeftstop` | None | Disable left movement flag |
-| `moveRightstop` | None | Disable right movement flag |
-| `moveForwardstop` | None | Disable forward movement flag |
-| `moveBackwardstop` | None | Disable backward movement flag |
-
-### Server to client
-
-| Event | Important fields | Purpose |
-|---|---|---|
-| `identity` | `me` | Tell the client its authenticated username |
-| `duplicate` | `message` | Report an already-active username |
-| `chat message` | `username`, message data | Deliver system or player chat |
-| `lobby-update` | Room/player information | Refresh lobby state |
-| `start typing` | Username data | Show typing indicator |
-| `stop typing` | Username data | Remove typing indicator |
-| `start match` | `msg`, `roomId`, `ws` | Initialize a full-room match |
-| `update-movement` | World state and dead players | Render authoritative game state |
-| `stop match` | `ordering` | Display final rankings |
-| `leave-room` | Player information | Remove disconnected player |
-
-When changing an event name or payload, update both `server.js` and `public/players.js`.
-
-## Data models
-
-### User
-
-Defined in `models/user.js`:
-
-| Field | Type | Notes |
-|---|---|---|
-| `name` | String | Player display name |
-| `email` | String | Sign-in identifier |
-| `password` | String | bcrypt hash |
-| `imageUrl` | String | Required path under `/images` |
-| `gamesplayed` | Number | Incremented when the game scene is opened |
-| `createdAt` | Date | Added by Mongoose timestamps |
-| `updatedAt` | Date | Added by Mongoose timestamps |
-
-There are currently no schema-level unique constraints for `name` or `email`.
-
-### Feedback
-
-Defined in `models/feedback.js`:
-
-| Field | Type | Notes |
-|---|---|---|
-| `name` | String | Required, free-form submitter name |
-| `feedback` | String array | Required; repeat submissions are appended |
-| `createdAt` | Date | Added by Mongoose timestamps |
-| `updatedAt` | Date | Added by Mongoose timestamps |
-
-Feedback is grouped by the submitted name, not by a user ID.
-
-## File uploads and static assets
-
-Multer uses disk storage:
-
-- Destination: `images/`
-- File name: current timestamp plus original file name
-- Allowed MIME types: `image/png`, `image/jpg`, and `image/jpeg`
-- Public URL prefix: `/images`
-
-The `public/` directory is served from the site root. The uploaded `images/` directory is served separately under `/images`.
-
-For production, consider object storage such as Amazon S3. Local container storage is not durable and original file names should not be trusted without additional sanitization.
-
-## Administrator feedback workflow
-
-The administrator dashboard loads every feedback document and builds an AI prompt asking for grouped, detailed feedback analysis. `controllers/admin.js` sends the prompt through the OpenAI SDK and renders the response in `views/fb.ejs`.
-
-This means:
-
-- Dashboard loading depends on MongoDB and the OpenAI API.
-- All stored feedback is included in a single request.
-- Large feedback collections may exceed model context or become expensive.
-- Feedback should be treated as untrusted prompt content.
-- A failed AI request can leave the generated content empty because the current helper logs the error and returns no fallback report.
-
-## CI/CD pipeline
-
-`Jenkinsfile` defines the following stages:
-
-1. **Verify Environment**: checks Node.js, npm, Docker client, and Docker daemon access.
-2. **Install Dependencies**: runs `npm ci`.
-3. **Run Tests**: runs `npx jest --passWithNoTests`.
-4. **Build Docker Image**: tags the image with the Jenkins build number and Git commit.
-5. **Install AWS CLI**: reuses an existing CLI or installs it under `/tmp`.
-6. **Inspect Image**: runs `docker image inspect`.
-7. **Push to ECR**: authenticates to Amazon ECR and pushes both build-number and `latest` tags.
-
-### Jenkins requirements
-
-- A Jenkins agent with Node.js, npm, Docker CLI, `curl`, and `unzip`
-- Access to the configured Docker daemon
-- Jenkins AWS credentials stored under `aws-ecr-credentials`
-- Permission to authenticate to and push to the configured ECR repository
-- Network access to AWS endpoints and the AWS CLI download endpoint
-
-`Dockerfile.jent` builds a Jenkins controller image with Docker CLI and the Blue Ocean, Docker Workflow, and JSON Path API plugins. It does not include a Docker daemon.
-
-### Infrastructure values
-
-The current `Jenkinsfile` contains fixed AWS account, region, repository, and Docker host values. Move environment-specific values into Jenkins credentials or parameters before reusing the pipeline in another account or environment.
-
-## Testing and verification
-
-There is no committed automated test suite at present. The package-level test command intentionally fails:
-
-```bash
-npm test
-```
-
-The Jenkins pipeline instead calls:
-
-```bash
-npx jest --passWithNoTests
-```
-
-This succeeds when no tests are found, so a green pipeline does not currently verify application behavior.
-
-Recommended initial test coverage:
-
-- Signup validation and duplicate handling
-- Sign-in success, incorrect password, JWT expiry, and logout
-- Admin OTP success, expiry, and attempt exhaustion
-- Route authorization for player and admin roles
-- Room allocation and room capacity
-- Duplicate socket connection behavior
-- Movement event validation and disconnect cleanup
-- Collision, damage, death, and ranking logic
-- Feedback creation and append behavior
-
-### Manual smoke test
+## Production Topology
 
 ```text
-[ ] Landing page renders
-[ ] Signup accepts a valid avatar
-[ ] Welcome email is sent
-[ ] Sign-in creates a session and player_jwt cookie
-[ ] Protected pages reject unauthenticated users
-[ ] Three distinct players start a match
-[ ] Movement is visible to every client in the room
-[ ] Chat and typing indicators work
-[ ] Disconnect removes the player
-[ ] Feedback is stored in MongoDB
-[ ] Admin OTP expires and limits retries
-[ ] Admin dashboard renders stored and AI-classified feedback
+Internet :80
+    |
+Amazon EC2
+    |
+    +-- PixelMania container :8081
+    |
+    +-- Redis 7 container :6379
 ```
 
-## Troubleshooting
+## Current Engineering Gaps
 
-### Database connection failed
+- Add meaningful unit, integration, and multiplayer behavior tests.
+- Add automated EC2 rollout, health verification, and rollback.
+- Add dedicated health and readiness endpoints.
+- Introduce structured production logging and monitoring.
+- Normalize package metadata that still references Echoes of Oblivion.
+- Enforce player email and username uniqueness with database indexes.
+- Correct simultaneous-direction handling in the client `keyup` flow.
+- Keep all administrator credentials outside source control and rotate exposed secrets.
+- Use a dedicated production start script instead of a nodemon-based package script.
 
-Check that:
+## Roadmap
 
-- `MONGODB_URI` is present and uses the exact variable name
-- The database hostname is reachable from the current environment
-- MongoDB Atlas permits the source IP
-- Credentials are URL-encoded when they contain special characters
+- [ ] Automated post-ECR deployment to EC2
+- [ ] Container health checks and rollback
+- [ ] Integration tests for authentication and room lifecycle
+- [ ] Load testing for concurrent Socket.IO rooms
+- [ ] Metrics for tick duration, room count, event latency, and disconnects
+- [ ] Improved client-side prediction and reconciliation
 
-The server currently logs a connection failure without terminating, so the HTTP port may still open while database-backed actions fail.
+## Project Evolution
 
-### Redis connection errors
+| Earlier Echoes snapshot | Current PixelMania state |
+| --- | --- |
+| Echoes of Oblivion branding | PixelMania / PixelManiaV2 identity |
+| Empty Dockerfile | Node 20 Alpine production image |
+| Dependency-only Compose setup | Application and Redis orchestration |
+| No application entrypoint | Signal-safe shell entrypoint |
+| No verified registry workflow | Jenkins build, tagging, inspection, and ECR publishing |
+| No verified public runtime | EC2 deployment verified on July 26, 2026 |
 
-For local Node.js execution, use:
+## Author
 
-```dotenv
-REDIS_URL=redis://127.0.0.1:6379
+Built independently by **Arav Gupta**.
+
+- GitHub: [@Aravcode2005](https://github.com/Aravcode2005)
+- Repository: [Aravcode2005/pixisecr](https://github.com/Aravcode2005/pixisecr)
+
+## Verification Reference
+
+This README is based on the engineering snapshot for commit:
+
+```text
+0d1e38dc88b5b23f7142c6fb72c17439436901e9
 ```
 
-Inside Docker Compose, use:
-
-```dotenv
-REDIS_URL=redis://redis:6379
-```
-
-`redis` is the Compose service DNS name and usually does not resolve from the host.
-
-### Signup creates no account or redirects to the error page
-
-- Confirm an avatar was selected.
-- Confirm it is PNG or JPEG.
-- Confirm `images/` exists and is writable.
-- Check MongoDB connectivity.
-- Check whether the username or email already exists.
-- Check SendGrid credentials; the current signup flow awaits email delivery.
-
-### OTP email is not received
-
-- Confirm `SGKEY` is valid.
-- Confirm the sender address is permitted by the SendGrid account.
-- Check spam/junk folders.
-- Confirm Redis is reachable.
-- Complete verification within five minutes.
-
-### The game does not start
-
-A match starts only when the assigned room contains exactly three connected players and each browser has emitted `join-room`. Use separate accounts; the server blocks duplicate active usernames.
-
-### Docker app cannot connect to MongoDB on the host
-
-`127.0.0.1` inside a container refers to the container itself. Use an accessible MongoDB hostname, a Compose MongoDB service, MongoDB Atlas, or the platform-specific host gateway.
-
-### Uploaded avatars disappear after deployment
-
-The current Compose service does not mount `images/` as a volume. Container replacement removes files written into the old container. Add persistent storage or migrate uploads to object storage.
-
-### Jenkins cannot reach Docker
-
-Verify the configured `DOCKER_HOST`, daemon TCP exposure, networking, and security controls. An unauthenticated Docker TCP socket grants highly privileged access and should not be exposed broadly.
-
-## Security and production readiness
-
-Before deploying publicly:
-
-1. Rotate any secret that has ever been committed or shared.
-2. Keep `.env` and credential files out of version control.
-3. Use a persistent session store. The default in-memory session store is not intended for production and does not work reliably across replicas.
-4. Set secure cookie behavior consistently. The player cookie is currently created with `secure: false`, while the admin cookie derives it from `NODE_ENV`.
-5. Restrict HTTP and Socket.IO CORS origins instead of allowing `*`.
-6. Add CSRF protection to state-changing form routes.
-7. Add request and authentication rate limits.
-8. Validate and normalize all form and Socket.IO payloads.
-9. Add upload size limits, content inspection, safe file naming, and durable storage.
-10. Add unique MongoDB indexes for username and email.
-11. Store administrator credentials as a password hash or use a managed identity provider.
-12. Remove password, JWT, OTP, and session data from logs.
-13. Validate required environment variables before listening.
-14. Wait for MongoDB and Redis readiness before accepting traffic.
-15. Add security headers with a package such as Helmet.
-16. Pin and audit production dependencies regularly.
-17. Avoid sending an unbounded feedback collection to the AI model.
-18. Protect the administrator logout route with the same authorization and CSRF controls as other admin actions.
-
-## Known limitations
-
-- The application has no automated tests.
-- The `package.json` `main` field does not match the actual entry point.
-- Production dependencies include Nodemon because it is used by `npm start`.
-- Express sessions use the default in-memory store.
-- Room and match state exists only in one Node.js process.
-- Horizontal scaling is not supported without shared Socket.IO state, sticky sessions, and a shared game-state design.
-- The game timer is a process-local `setTimeout` and is not cancelled or persisted.
-- MongoDB connection failure does not stop server startup.
-- Usernames and emails do not have unique database indexes.
-- Profile updates do not fully refresh the session state.
-- Feedback submitter identity is free-form and same-name submissions are merged.
-- File upload middleware is mounted globally rather than only on upload routes.
-- Uploaded files are stored on local disk.
-- The generated administrator OTP expression can produce a value outside the six-digit UI range.
-- Some authentication and token data is logged.
-- The administrator JWT verification handler restores the admin name from a payload property that does not match the property used when signing.
-- The heap-ranking helper should be covered by tests before its ordering is relied on.
-- Older views, scripts, and package dependencies remain in the repository and should be reviewed before removal.
-
-## Suggested next steps
-
-1. Add configuration validation and fail-fast startup.
-2. Introduce unit and integration tests.
-3. Correct authentication, OTP, and logging issues.
-4. Add MongoDB unique indexes and validation.
-5. Move sessions and Socket.IO coordination to shared infrastructure.
-6. Persist avatars outside the application container.
-7. Parameterize the Jenkins AWS and Docker settings.
-8. Remove confirmed legacy code and unused dependencies.
-
+Snapshot date: **July 26, 2026**
